@@ -17,6 +17,7 @@ class Raw(scrapy.Item):
 
 
 class Metadata(scrapy.Item):
+    url = scrapy.Field()
     title = scrapy.Field()
     identifier = scrapy.Field()
     source = scrapy.Field()
