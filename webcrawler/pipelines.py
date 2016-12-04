@@ -21,19 +21,20 @@ class TikaParser(object):
         Returns an instance of webcrawler.items.Metadata
         '''
         try:
-            parsed = parser.from_file(item.filename)
+            parsed = parser.from_file(item['filename'])
         except:
-            spider.logger.warning('Failed to parse content of "{}"'.format(item.url))
+            spider.logger.warning('Failed to parse content of "{}"'.format(item['url']))
             raise DropItem
         finally:
             # delete the temporary file
-            os.remove(item.filename)
+            os.remove(item['filename'])
 
         # create an instance of webcrawler.items.Metadata
         content = parsed.get('content', '')
         parsed_meta = parsed.get('metadata', {})
 
         meta = Metadata(
+            url=item['url'],
             title=parsed_meta.get('title'),
             identifier=parsed_meta.get('identifier'),
             source=parsed_meta.get('source'),
