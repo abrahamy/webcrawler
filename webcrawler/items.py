@@ -8,7 +8,35 @@
 import scrapy
 
 
-class WebcrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class Raw(scrapy.Item):
+    '''
+    Returns the crawled url and a file-like object representing the content
+    '''
+    url = scrapy.Field()
+    filename = scrapy.Field()
+
+
+class Metadata(scrapy.Item):
+    title = scrapy.Field()
+    identifier = scrapy.Field()
+    source = scrapy.Field()
+    type = scrapy.Field()
+    content_type_hint = scrapy.Field()
+    format = scrapy.Field()
+    description = scrapy.Field()
+    language = scrapy.Field()
+    created = scrapy.Field()
+    creator = scrapy.Field()
+    contributor = scrapy.Field()
+    modified = scrapy.Field()
+    modifier = scrapy.Field()
+    original_resource_name = scrapy.Field()
+    print_date = scrapy.Field()
+    publisher = scrapy.Field()
+    rating = scrapy.Field()
+    keywords = scrapy.Field()
+    comments = scrapy.Field()
+    rights = scrapy.Field()
+    relation = scrapy.Field()
+    meta_data_date = scrapy.Field()
+    content = scrapy.Field()
