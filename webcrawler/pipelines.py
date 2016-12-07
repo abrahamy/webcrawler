@@ -36,16 +36,12 @@ class TikaParser(object):
         meta = Metadata(
             url=item['url'],
             title=parsed_meta.get('title'),
-            identifier=parsed_meta.get('identifier'),
             source=parsed_meta.get('source'),
-            type=parsed_meta.get('type'),
-            content_type_hint=parsed_meta.get('content_type_hint'),
-            format=parsed_meta.get('format'),
+            content_type=parsed_meta.get('type'),
             description=parsed_meta.get('description'),
             language=parsed_meta.get('language'),
             created=parsed_meta.get('created'),
             creator=parsed_meta.get('creator'),
-            contributor=parsed_meta.get('contributor'),
             modified=parsed_meta.get('modified'),
             modifier=parsed_meta.get('modifier'),
             original_resource_name=parsed_meta.get('original_resource_name'),
@@ -53,9 +49,6 @@ class TikaParser(object):
             publisher=parsed_meta.get('publisher'),
             rating=parsed_meta.get('rating'),
             keywords=parsed_meta.get('keywords'),
-            comments=parsed_meta.get('comments'),
-            rights=parsed_meta.get('rights'),
-            relation=parsed_meta.get('relation'),
             meta_data_date=parsed_meta.get('meta_data_date'),
             content=parsed_meta.get('content')
         )
