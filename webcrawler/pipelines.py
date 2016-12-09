@@ -1,27 +1,33 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import os
-import tika
+import os, tika
 from tika import parser
 from scrapy.exceptions import DropItem
-from webcrawler.items import Metadata
+from webcrawler.items import Archive, CrawlData, Raw
 
 
 tika.TikaClientOnly = True
 
 
-class TikaParser(object):
+class ContentParser(object):
     def process_item(self, item, spider):
         '''
-        Takes an instance of webcrawler.items.Raw and parses using a Tika RestAPI
-        Returns an instance of webcrawler.items.Metadata
+        Takes an instance of webcrawler.items.Raw and parses the content using Tika RestAPI
+        Returns an instance of webcrawler.items.CrawlData
         '''
         try:
+            assert(type(item)==Raw)
             parsed = parser.from_file(item['filename'])
+
+        except AssertionError as e:
+            spider.logger.warning(
+                'ContentParser expects item to be an instance of webcrawler.items.Raw \
+                but got {} instead.'.format(
+                    '.'.join([item.__class__.__module__, item.__class__.__name__])
+                )
+            )
+
+            return item
         except:
             spider.logger.warning('Failed to parse content of "{}"'.format(item['url']))
             raise DropItem
@@ -29,38 +35,43 @@ class TikaParser(object):
             # delete the temporary file
             os.remove(item['filename'])
 
-        # create an instance of webcrawler.items.Metadata
-        content = parsed.get('content', '')
-        parsed_meta = parsed.get('metadata', {})
-
-        meta = Metadata(
+        # create an instance of webcrawler.items.CrawlData
+        data = CrawlData(
             url=item['url'],
-            title=parsed_meta.get('title'),
-            source=parsed_meta.get('source'),
-            content_type=parsed_meta.get('type'),
-            description=parsed_meta.get('description'),
-            language=parsed_meta.get('language'),
-            created=parsed_meta.get('created'),
-            creator=parsed_meta.get('creator'),
-            modified=parsed_meta.get('modified'),
-            modifier=parsed_meta.get('modifier'),
-            original_resource_name=parsed_meta.get('original_resource_name'),
-            print_date=parsed_meta.get('print_date'),
-            publisher=parsed_meta.get('publisher'),
-            rating=parsed_meta.get('rating'),
-            keywords=parsed_meta.get('keywords'),
-            meta_data_date=parsed_meta.get('meta_data_date'),
-            content=parsed_meta.get('content')
+            content=parsed.get('content', ''),
+            meta=parsed.get('metadata', {})
         )
 
-        return meta
+        return data
 
 
-class MetadataPersister(object):
+class DataPersister(object):
     def process_item(self, item, spider):
-        pass
+        '''
+        Takes an instance of webcrawler.items.CrawlData and persists it in the database
+        '''
+        try:
+            assert(type(item)==CrawlData)
+
+            model = Archive(
+                id=Archive.gen_pk(), url=item['url'],
+                data=item['content'], meta=item['meta']
+            )
+
+            model.save()
+            return model
+
+        except AssertionError as e:
+            spider.logger.warning(
+                'DataPersiter expects item to be an instance of \
+                webcrawler.items.CrawlData but got {} instead'.format(
+                    '.'.join([item.__class__.__module__, item.__class__.__name__])
+                )
+            )
+
+            return item
 
 
-class Indexer(object):
+class FTSIndexer(object):
     def process_item(self, item, spider):
         pass

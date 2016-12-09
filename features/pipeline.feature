@@ -1,6 +1,9 @@
-Feature: TikaParser pipeline
+Feature: ContentParser feature
     
-    Scenario: parse an item using Tika server
-        Given an instance of TikaParser pipeline, a Raw item and a CmslSpider
-        When the process_item is called with a Raw item and a CmslSpider
-        Then it should return a Metadata item
+    Scenario: parse the content of a response
+        Given a CmslSpider and Response
+        When CmslSpider.parse_item is called
+        Then it should return a Raw item
+        Given a ContentParser
+        When ContentParser.process_item is called
+        Then it should return a CrawlData item
