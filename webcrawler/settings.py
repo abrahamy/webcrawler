@@ -66,8 +66,7 @@ CONCURRENT_REQUESTS_PER_IP = 1
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'webcrawler.pipelines.ContentParser': 300,
-    'webcrawler.pipelines.DataPersister': 400,
-    'webcrawler.pipelines.FTSIndexer': 500,
+    'webcrawler.pipelines.FTSIndexer': 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -90,4 +89,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-SQL_ALCHEMY_URI = 'postgresql://postgres:secret@localhost:5432/webcrawler'
+
+# Database connection URI
+DATABASE_URI = 'postgresext+pool://postgres:secret@localhost:5432/webcrawler?max_connections=10&stale_timeout=300'
