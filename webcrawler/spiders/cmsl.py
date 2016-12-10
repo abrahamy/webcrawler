@@ -3,6 +3,7 @@ import tempfile
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.utils.project import get_project_settings
 from webcrawler.items import Raw
 
 
@@ -12,17 +13,17 @@ link_extractor = LinkExtractor(
     attrs=('href', 'src'), deny_extensions=()
 )
 
+def get_start_urls():
+    '''
+    Get start_urls from settings and cache the result
+    '''
+    settings = get_project_settings()
+    return settings.getlist('DEFAULT_START_URLS')
+
 
 class CmslSpider(CrawlSpider):
     name = 'cmsl'
-    start_urls = [
-            'http://www.nairaland.com/',
-            'http://www.lindaikejisblog.com/',
-            'https://www.reddit.com/',
-            'https://news.ycombinator.com/',
-            'http://botid.org/',
-        ]
-
+    start_urls = get_start_urls()
     rules = (
         Rule(link_extractor, callback='parse_item', follow=True),
     )

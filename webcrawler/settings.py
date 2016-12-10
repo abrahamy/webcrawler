@@ -93,3 +93,18 @@ ITEM_PIPELINES = {
 
 # Database connection URI
 DATABASE_URI = 'postgresext+pool://postgres:secret@localhost:5432/webcrawler?max_connections=10&stale_timeout=300'
+
+DEFAULT_START_URLS = [
+    'http://www.nairaland.com/',
+    'http://www.lindaikejisblog.com/',
+    'https://www.reddit.com/',
+    'https://news.ycombinator.com/',
+    'http://botid.org/',
+    'http://www.dirjournal.com/',
+    'http://www.jayde.com/',
+    'http://www.dmoz.org/',
+    'http://vlib.org/',
+    'http://www.business.com/',
+    'https://botw.org/',
+    'http://www.stpt.com/directory/',
+]
