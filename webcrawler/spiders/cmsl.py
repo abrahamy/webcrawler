@@ -6,12 +6,11 @@ from scrapy.spiders import CrawlSpider, Rule
 from webcrawler.items import Raw
 
 
-def is_new_or_stale(link):
-    '''
-    If link has been crawled check staleness using etag & last-modified headers.
-    If fresh return None to discard link.
-    '''
-    return link # @TODO: Implement this
+# configure LinkExtractor to extract EVERY link!!!
+link_extractor = LinkExtractor(
+    tags=('a', 'area', 'img', 'source', 'track', 'embed'),
+    attrs=('href', 'src'), deny_extensions=()
+)
 
 
 class CmslSpider(CrawlSpider):
@@ -21,10 +20,11 @@ class CmslSpider(CrawlSpider):
             'http://www.lindaikejisblog.com/',
             'https://www.reddit.com/',
             'https://news.ycombinator.com/',
+            'http://botid.org/',
         ]
 
     rules = (
-        Rule(LinkExtractor(process_value=is_new_or_stale), callback='parse_item', follow=True),
+        Rule(link_extractor, callback='parse_item', follow=True),
     )
 
     def parse_item(self, response):
