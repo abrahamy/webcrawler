@@ -47,39 +47,36 @@ class Archive(Model):
 
         return super().save(**kwargs)
     
-    def fulltext_search(self, term, page_number=1, items_per_page=20, return_json=True):
+    @classmethod
+    def fulltext_search(cls, term, page_number=1, items_per_page=20, return_json=True):
         '''
         Execute a full text search query on the model and return a paginated result
         of matching records in JSON format or as model instances
         '''
-        results = Archive.select().where(
-            Match(Archive.search, term) |
-            Match(Archive.metadata['title'], term) |
-            Match(Archive.metadata['description'], term)
+        results = cls.select().where(
+            Match(cls.search, term) |
+            Match(cls.metadata['title'], term) |
+            Match(cls.metadata['description'], term)
         ).paginate(page_number, items_per_page)
 
         if return_json:
-            res
+            return cls.to_json(results)
         
         return results
     
-    def to_json(self, query=None):
+    @staticmethod
+    def to_json(query):
         '''
-        Return the list of models in the query as a JSON array if a SelectQuery
-        is given otherwise return the current model instance as a JSON object
+        Return the list of models in the query as a JSON array given a SelectQuery
         @TODO: clean the metadata field
         '''
-        to_dict = lambda m: model_to_dict(m, only=['url', 'metadata'])
-
-        if not query:
-            return json.dumps(to_dict(self))
-        
         if type(query) is not SelectQuery:
             raise ValueError
         
+        only_fields = ['url', 'metadata']
         results = []
         for model in query:
-            results.append(to_dict(model))
+            results.append(model_to_dict(model, only=only_fields))
         
         return json.dumps(results)
     
