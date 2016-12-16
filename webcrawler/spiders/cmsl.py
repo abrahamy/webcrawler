@@ -56,10 +56,11 @@ class CmslSpider(CrawlSpider):
         '''
         Extract all external links from this page
         '''
+        if not isinstance(response, scrapy.http.HtmlResponse):
+            return []
+        
         parsed_url = urlparse(response.url)
-        domain = '{}://{}'.format(
-            parsed_url.scheme, parsed_url.netloc
-        )
+        domain = (parsed_url.netloc,)
 
         link_extractor = LinkExtractor(deny_domains=domain)
         links = map(lambda link: link.url, link_extractor.extract_links(response))

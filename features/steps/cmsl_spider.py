@@ -1,6 +1,6 @@
 from behave import *
 from urllib.parse import urlparse
-from scrapy.http import Request, Response
+from scrapy.http import Request, HtmlResponse
 from webcrawler.items import Item
 from webcrawler.spiders.cmsl import CmslSpider
 
@@ -16,6 +16,7 @@ RESPONSE_BODY = b'''
             <li><a href="/page2">Another Internal Link</a></li>
             <li><a href="http://www.ext.com/extpage">External Link</a></li>
             <li><a href="http://ext.com/that/page">Another External Link</a></li>
+            <li><a href="http://www.scion.com/that/page">Yet Another External Link</a></li>
         </ul>
     </body>
 </html>
@@ -25,7 +26,7 @@ RESPONSE_BODY = b'''
 def step_impl(context):
     request = Request(URL)
 
-    context.response = Response(URL, body=RESPONSE_BODY, request=request)
+    context.response = HtmlResponse(URL, body=RESPONSE_BODY, request=request)
     context.spider = CmslSpider()
 
 
@@ -53,7 +54,10 @@ def step_impl(context):
 @then('the urls should be external urls')
 def step_impl(context):
     extracted_urls = context.extract_external_links_result
-    same_domain = filter(lambda url: urlparse(url).netloc.contains('example.com'))
+    same_domain = list(filter(
+        lambda url: urlparse(url).netloc.find('example.com') is not -1,
+        extracted_urls
+    ))
 
-    assert(len(extracted_urls)==2)
+    assert(len(extracted_urls)==3)
     assert(len(same_domain)==0)
