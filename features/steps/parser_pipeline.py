@@ -63,9 +63,10 @@ def step_impl(context):
     assert(type(context.process_item_result)==Parsed)
 
 
-@given('an invalid item and a webcrawler.spiders.cmsl.CmslSpider')
+@given('a webcrawler.pipelines.ContentParser, an invalid item and a webcrawler.spiders.cmsl.CmslSpider')
 def step_impl(context):
-    # Context already contains a spider so populate invalid_item only
+    context.parser = ContentParser()
+    context.spider = CmslSpider()
     context.invalid_item = ('Hello, World!',)
 
 

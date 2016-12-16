@@ -40,8 +40,9 @@ class ContentParser(object):
                 'Failed to parse content of "{}"'.format(item['url'])
             )
         finally:
-            # delete the temporary file
-            os.remove(item['temp_filename'])
+            if isinstance(item, Item):
+                # delete the temporary file
+                os.remove(item['temp_filename'])
         
         raise DropItem
 
