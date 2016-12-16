@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import tempfile
 import scrapy
+from urllib.parse import urlparse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.utils.project import get_project_settings
-from webcrawler.items import Raw
+from webcrawler.items import Item
 
 
 # configure LinkExtractor to extract EVERY link!!!
@@ -12,6 +13,7 @@ link_extractor = LinkExtractor(
     tags=('a', 'area', 'img', 'source', 'track', 'embed'),
     attrs=('href', 'src'), deny_extensions=()
 )
+
 
 def get_start_urls():
     '''
@@ -29,13 +31,37 @@ class CmslSpider(CrawlSpider):
     )
 
     def parse_item(self, response):
+        '''
+        Parse a response into an instance of webcrawler.items.Item
+        '''
         try:
+            fields = {
+                'url': response.url,
+                'links': self.extract_external_links(response)
+            }
+
             with tempfile.NamedTemporaryFile(delete=False) as stream:
                 stream.write(response.body)
-                filename = stream.name
+                fields['temp_filename'] = stream.name
+            
+            return Item(**fields)
 
-        except OSError as e:
-            filename = None
-        
-        item = Raw(url=response.url, filename=filename)
-        return item
+        except OSError:
+            self.logger.error(
+                'Failed to save response.body to temporary file', exec_info=True
+            )
+    
+    @staticmethod
+    def extract_external_links(response):
+        '''
+        Extract all external links from this page
+        '''
+        parsed_url = urlparse(response.url)
+        domain = '{}://{}'.format(
+            parsed_url.scheme, parsed_url.netloc
+        )
+
+        link_extractor = LinkExtractor(deny_domains=domain)
+        links = map(lambda link: link.url, link_extractor.extract_links(response))
+
+        return list(links)

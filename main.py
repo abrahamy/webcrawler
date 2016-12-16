@@ -4,7 +4,7 @@ from scrapy.utils.project import get_project_settings
 from twisted.internet import endpoints, reactor
 from twisted.web import http, resource, server
 from webcrawler.spiders.cmsl import CmslSpider
-from webcrawler.items import Archive
+from webcrawler.items import Document
 
 
 class SearchAPI(resource.Resource):
@@ -23,7 +23,7 @@ class SearchAPI(resource.Resource):
             request.setResponseCode(http.BAD_REQUEST)
             return http.RESPONSES[http.BAD_REQUEST]
         
-        search_results = Archive.fulltext_search(
+        search_results = Document.fulltext_search(
             search.term, search.page_number, search.items_per_page
         )
 

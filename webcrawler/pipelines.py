@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import datetime, os, tika
-from tika import parser
-from peewee import fn, IntegrityError
+import os
+from tika import tika, parser
 from scrapy.exceptions import DropItem
-from webcrawler.items import Archive, CrawlData, Raw
+from webcrawler.items import Document, Item, Parsed
 
 
 tika.TikaClientOnly = True
@@ -13,71 +12,68 @@ tika.TikaClientOnly = True
 class ContentParser(object):
     def process_item(self, item, spider):
         '''
-        Takes an instance of webcrawler.items.Raw and parses the content using Tika RestAPI
-        Returns an instance of webcrawler.items.CrawlData
+        Takes an instance of webcrawler.items.Item and parses the content using Tika RestAPI
+        Returns an instance of webcrawler.items.Parsed
         '''
         try:
-            if type(item) is not Raw:
+            if type(item) is not Item:
                 spider.logger.warning(
-                    'ContentParser expects item to be an instance of webcrawler.items.Raw \
-                    but got {} instead.'.format(
+                    'ContentParser expects item to be an instance of webcrawler.items.Item \
+                    got {} instead.'.format(
                         '.'.join([item.__class__.__module__, item.__class__.__name__])
                     )
                 )
                 
                 return item
 
-            parsed = parser.from_file(item['filename'])
+            parsed = parser.from_file(item['temp_filename'])
+
+            return Parsed(
+                url=item['url'],
+                links=item['links'],
+                text=parsed.get('content', ''),
+                meta=parsed['metadata']
+            )
 
         except:
-            spider.logger.warning('Failed to parse content of "{}"'.format(item['url']))
-            raise DropItem
+            spider.logger.warning(
+                'Failed to parse content of "{}"'.format(item['url'])
+            )
         finally:
             # delete the temporary file
-            os.remove(item['filename'])
-
-        # create an instance of webcrawler.items.CrawlData
-        data = CrawlData(
-            url=item['url'],
-            content=parsed.get('content', ''),
-            meta=parsed.get('metadata', {})
-        )
-
-        return data
+            os.remove(item['temp_filename'])
+        
+        raise DropItem
 
 
 class FTSIndexer(object):
     def process_item(self, item, spider):
         '''
-        Takes an instance of webcrawler.items.CrawlData generates a full text search Index
+        Takes an instance of webcrawler.items.Parsed generates a full text search Index
         for the content and persists the index and metadata
         '''
         try:
-            if type(item) is not CrawlData:
+            if type(item) is not Parsed:
                 spider.logger.warning(
                     'FTSIndexer expects item to be an instance of \
-                    webcrawler.items.CrawlData but got {} instead'.format(
+                    webcrawler.items.Parsed got {} instead'.format(
                         '.'.join([item.__class__.__module__, item.__class__.__name__])
                     )
                 )
 
                 raise DropItem
+            
+            doc_fields = Document.get_fields_from_tika_metadata(item['meta'])
+            doc_fields['text'] = item['text']
+            doc_fields['url'] = item['url']
+            doc_fields['links_to'] = item['links']
 
-            Archive.create(
-                url=item['url'],
-                search=fn.to_tsvector(item['content']),
-                metadata=item['meta']
-            )
+            Document.create(**doc_fields)
 
             return None
 
-        except IntegrityError as e:
-            '''
-            This URL has been been indexed before. Just regenerate index in case the
-            content has changed.
-            '''
-            Archive.update(
-                search=fn.to_tsvector(item['content']),
-                metadata=item['meta'],
-                modified_date=datetime.datetime.now()
+        except:
+            spider.logger.warning(
+                'Failed to index url and metadata for {}'.format(item['url']),
+                exec_info=True
             )

@@ -90,3 +90,4 @@ ENV/
 # Rope project settings
 .ropeproject
 features/fixtures/
+tika-server-1.14.jar
