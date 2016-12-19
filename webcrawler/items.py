@@ -51,11 +51,6 @@ class Parsed(scrapy.Item):
     meta = scrapy.Field()
 
 
-def get_db():
-    db_uri = get_project_settings().get('DATABASE_URI')
-    return connect(db_uri)
-
-
 class BaseModel(Model):
 
     def save(self, **kwargs):
@@ -65,7 +60,9 @@ class BaseModel(Model):
         return super().save(**kwargs)
 
     class Meta:
-        database = get_db()
+        database = connect(
+            get_project_settings().get('DATABASE_URI')
+        )
 
 
 class Document(BaseModel):
