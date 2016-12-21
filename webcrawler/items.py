@@ -7,6 +7,7 @@ from peewee import (
 )
 from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField, TSVectorField, Match
+from playhouse.pool import PooledPostgresqlExtDatabase
 from playhouse.signals import post_save
 from playhouse.shortcuts import model_to_dict
 from scrapy.utils.project import get_project_settings
@@ -51,6 +52,15 @@ class Parsed(scrapy.Item):
     meta = scrapy.Field()
 
 
+def get_db():
+    '''Create a new database connection'''
+    db_settings = get_project_settings().getdict('CMSL_BOT_DATABASE')
+    return PooledPostgresqlExtDatabase(
+        db_settings.pop('name'),
+        **db_settings
+    )
+
+
 class BaseModel(Model):
 
     def save(self, **kwargs):
@@ -60,33 +70,31 @@ class BaseModel(Model):
         return super().save(**kwargs)
 
     class Meta:
-        database = connect(
-            get_project_settings().get('DATABASE_URI')
-        )
+        database = get_db()
 
 
 class Document(BaseModel):
     url = CharField(unique=True)
-    content_type = CharField()
-    contributor = CharField()
-    coverage = CharField()
-    created = DateTimeField()
-    creator = CharField()
-    date = DateTimeField()
-    description = TextField()
-    format = CharField()
-    identifier = CharField()
-    language = CharField()
-    modified = DateTimeField()
-    publisher = CharField()
-    relation = CharField()
-    rights = CharField()
-    source = CharField()
-    subject = TextField()
-    title = TextField()
-    type = CharField()
-    text = TextField()
-    links_to = ArrayField(CharField) # May be used by page ranking algorithm in the future
+    content_type = CharField(null=True)
+    contributor = CharField(null=True)
+    coverage = CharField(null=True)
+    created = DateTimeField(null=True)
+    creator = CharField(null=True)
+    date = DateTimeField(null=True)
+    description = TextField(null=True)
+    format = CharField(null=True)
+    identifier = CharField(null=True)
+    language = CharField(null=True)
+    modified = DateTimeField(null=True)
+    publisher = CharField(null=True)
+    relation = CharField(null=True)
+    rights = CharField(null=True)
+    source = CharField(null=True)
+    subject = TextField(null=True)
+    title = TextField(null=True)
+    type = CharField(null=True)
+    text = TextField(null=True)
+    links_to = ArrayField(CharField, default=[]) # May be used by page ranking algorithm in the future
 
     @classmethod
     def create(cls, **query):
@@ -99,7 +107,31 @@ class Document(BaseModel):
             instance = Document.select(Document.url==query.pop('url')).get()
             instance.update(**query)
         
+        instance.create_search_model()
+        
         return instance
+    
+    def create_search_model(self):
+        '''
+        Creates a full text searchable model derived from this instance
+        '''
+        fields = {
+            'document': self,
+            'subject': fn.to_tsvector(self.subject),
+            'title': fn.to_tsvector(self.title),
+            'description': fn.to_tsvector(self.description),
+            'creator': fn.to_tsvector(self.creator),
+            'contributor': fn.to_tsvector(self.contributor),
+            'publisher': fn.to_tsvector(self.publisher),
+            'text': fn.to_tsvector(self.text)
+        }
+        # if the Document already have a Search model update that instead
+        try:
+            return Search.create(**fields)
+        except IntegrityError as e:
+            search = Search.select(Search.document==self).get()
+            search.update(**fields)
+            return search
     
     @staticmethod
     def get_fields_from_tika_metadata(metadata):
@@ -160,36 +192,10 @@ class Document(BaseModel):
 
 class Search(BaseModel):
     document = ForeignKeyField(Document, unique=True)
-    subject = TSVectorField()
-    title = TSVectorField()
-    description = TSVectorField()
-    creator = TSVectorField()
-    contributor = TSVectorField()
-    publisher = TSVectorField()
-    text = TSVectorField()
-
-
-@post_save(sender=Document)
-def create_search_index(model_class, instance, created):
-    '''
-    Creates a fulltext searchable model derived from the document model
-    each time a Document model is created
-    '''
-    fields = {
-        'document': instance,
-        'subject': fn.to_tsvector(instance.subject),
-        'title': fn.to_tsvector(instance.title),
-        'description': fn.to_tsvector(instance.description),
-        'creator': fn.to_tsvector(instance.creator),
-        'contributor': fn.to_tsvector(instance.contributor),
-        'publisher': fn.to_tsvector(instance.publisher),
-        'text': fn.to_tsvector(instance.text)
-    }
-
-    # if the Document already have a Search model update that instead
-    try:
-        return Search.create(**fields)
-    except IntegrityError as e:
-        search = Search.select(Search.document==instance).get()
-        search.update(**fields)
-        return search
+    subject = TSVectorField(null=True)
+    title = TSVectorField(null=True)
+    description = TSVectorField(null=True)
+    creator = TSVectorField(null=True)
+    contributor = TSVectorField(null=True)
+    publisher = TSVectorField(null=True)
+    text = TSVectorField(null=True)
