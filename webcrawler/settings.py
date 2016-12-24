@@ -22,15 +22,16 @@ USER_AGENT = 'CMSL Bot (+http://www.cmsl.com)'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 200
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.25
+DOWNLOAD_TIMEOUT = 15
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 8
-CONCURRENT_REQUESTS_PER_IP = 1
+# CONCURRENT_REQUESTS_PER_DOMAIN = 8
+# CONCURRENT_REQUESTS_PER_IP = 0
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -85,14 +86,22 @@ ITEM_PIPELINES = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-#HTTPCACHE_ENABLED = True
-#HTTPCACHE_EXPIRATION_SECS = 0
-#HTTPCACHE_DIR = 'httpcache'
-#HTTPCACHE_IGNORE_HTTP_CODES = []
-#HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+HTTPCACHE_ENABLED = True
+HTTPCACHE_EXPIRATION_SECS = 24 * 60 * 60 # cache for 24 hours
+HTTPCACHE_DIR = 'httpcache'
+# HTTPCACHE_IGNORE_HTTP_CODES = []
+HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+HTTPCACHE_GZIP = True
+HTTPCACHE_POLICY = 'scrapy.extensions.httpcache.RFC2616Policy'
 
-# Database connection URI
-DATABASE_URI = 'postgresext+pool://postgres:secret@localhost:5432/webcrawler?max_connections=10&stale_timeout=300'
+# Database connection settings
+CMSL_BOT_DATABASE = {
+    'name': 'webcrawler',
+    'user': 'postgres',
+    'password': 'secret',
+    'host': 'localhost',
+    'port': 5432
+}
 
 DEFAULT_START_URLS = [
     'http://www.nairaland.com/',
@@ -108,3 +117,17 @@ DEFAULT_START_URLS = [
     'https://botw.org/',
     'http://www.stpt.com/directory/',
 ]
+
+# The settings from this point to EOF are especially
+# important for broad crawls
+LOG_LEVEL = 'INFO'
+RETRY_ENABLED = False
+REDIRECT_ENABLED = False
+AJAXCRAWL_ENABLED = True
+REACTOR_THREADPOOL_MAXSIZE = 50
+
+# The next three settings ensures that the spider does
+# a Breadth-First-Order (BFO) search
+DEPTH_PRIORITY = 1
+SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
+SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
