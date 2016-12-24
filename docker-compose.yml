@@ -1,0 +1,37 @@
+version: '2'
+services:
+    cmslbot:
+        build: .
+        container_name: cmslbot
+        volumes:
+            - "/var/log/cmslbot:/var/log/cmslbot"
+        links:
+            - "postgres"
+            - "tikaserver"
+
+    tikaserver:
+        image: logicalspark/docker-tikaserver
+        container_name: tikaserver
+        expose:
+            - "9998"
+
+    postgres:
+        image: postgres
+        container_name: postgres
+        expose:
+            - "5432"
+        environment:
+            POSTGRES_PASSWORD: secret
+            PGDATA: /var/lib/postgresql/data
+        volumes:
+            - "/var/lib/postgresql/data:/var/lib/postgresql/data"
+
+    pgadmin4:
+        image: fenglc/pgadmin4
+        container_name: pgadmin4
+        expose:
+            - "5050"
+        ports:
+            - "5050:5050"
+        links:
+            - "postgres"
