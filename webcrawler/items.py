@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import datetime, json, scrapy
+import json, scrapy
+from dateutil.parser import parse
 from peewee import (
     CharField, DateTimeField, TextField, ForeignKeyField,
     Model, SelectQuery, fn, IntegrityError
 )
 from playhouse.db_url import connect
-from playhouse.postgres_ext import ArrayField, TSVectorField, Match
+from playhouse.postgres_ext import ArrayField, TSVectorField
 from playhouse.pool import PooledPostgresqlExtDatabase
-from playhouse.signals import post_save
 from playhouse.shortcuts import model_to_dict
 from scrapy.utils.project import get_project_settings
 
@@ -94,7 +94,8 @@ class Document(BaseModel):
     title = TextField(null=True)
     type = CharField(null=True)
     text = TextField(null=True)
-    links_to = ArrayField(CharField, default=[]) # May be used by page ranking algorithm in the future
+    # The next field may be required for page ranking algorithm in the future
+    links_to = ArrayField(CharField, default=[])
 
     @classmethod
     def create(cls, **query):
@@ -137,7 +138,7 @@ class Document(BaseModel):
     def get_fields_from_tika_metadata(metadata):
         fields = {}
 
-        for key, value in DOC_FIELD_TO_TIKA_META:
+        for key, value in DOC_FIELD_TO_TIKA_META.items():
             if type(value) is list:
                 # get the data of the first key in value that matches a key in the metadata
                 for k in value:
@@ -147,6 +148,14 @@ class Document(BaseModel):
                         break
             else:
                 fields[key] = metadata.get(value)
+        
+        # parse the datetime strings from tika metadata into
+        # python datetime objects
+        date_fields = ['created', 'date', 'modified']
+        for field in date_fields:
+            value = fields[field]
+            if value and isinstance(value, str):
+                fields[field] = parse(value)
         
         return fields
 
@@ -160,13 +169,13 @@ class Document(BaseModel):
                     .select()
                     .join(Search, on=Search.document)
                     .where(
-                        Match(Search.text, term) |
-                        Match(Search.subject, term) |
-                        Match(Search.title, term) |
-                        Match(Search.description, term) |
-                        Match(Search.creator, term) |
-                        Match(Search.contributor, term) |
-                        Match(Search.publisher, term)
+                        Search.text.match(term) |
+                        Search.subject.match(term) |
+                        Search.title.match(term) |
+                        Search.description.match(term) |
+                        Search.creator.match(term) |
+                        Search.contributor.match(term) |
+                        Search.publisher.match(term)
                     ).paginate(page_number, items_per_page))
 
         if return_json:
