@@ -19,12 +19,12 @@ RUN         set -ex \
                     python3 \
                     py-pip \
                 && apk add --no-cache --virtual buildDeps \
-                    build-base \
+                    python3-dev \
                     libpq-dev \
                     libffi-dev \
                     postgresql-dev \
                     build-base \
-                && pip install --no-cache-dir --upgrade \
+                && python3 -m pip install --no-cache-dir --upgrade \
                     --force-reinstall -r requirements.txt \
                 && apk del buildDeps
 
