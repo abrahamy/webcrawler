@@ -1,8 +1,6 @@
+'''A RESTful API for searching indexed documents'''
 import hug
 from webcrawler.items import Document
-
-
-'''A RESTful API for searching indexed documents'''
 
 
 @hug.get()

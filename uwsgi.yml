@@ -1,0 +1,11 @@
+uwsgi:
+    shared-socket: :80
+    http: =0
+    module: webcrawler.rest_api
+    callable: __hug_wsgi__
+    master: true
+    processes: 4
+    threads: 2
+    harakiri: 30
+    stats: 127.0.0.1:9191
+    daemonize: /var/log/cmslbot/rest.log

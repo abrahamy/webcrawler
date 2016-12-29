@@ -1,4 +1,4 @@
-FROM        python:alpine
+FROM        alpine
 MAINTAINER  aaondowasey@gmail.com
 
 LABEL       Author      = "Abraham Aondowase Yusuf"\
@@ -6,19 +6,34 @@ LABEL       Author      = "Abraham Aondowase Yusuf"\
             Version     = "1.0.0"\
             Copyright   = "2016, Abraham Aondowase Yusuf"
 
-ENV         TIKA_CLIENT_ONLY True
-
-VOLUME      ["/var/log/cmslbot"]
-
-EXPOSE      80 6800
+ENV         TIKA_CLIENT_ONLY True \
+            LANG C.UTF-8
 
 COPY        . /usr/src/webcrawler
 WORKDIR     /usr/src/webcrawler
 
-RUN         apk add --no-cache postgresql-dev libffi-dev
-RUN         pip3 install --no-cache-dir --upgrade \
-                --force-reinstall -r requirements.txt
+RUN         set -ex \
+                && apk add --no-cache \
+                    ca-certificates \
+                    libpq \
+                    python3 \
+                    py-pip \
+                && apk add --no-cache --virtual buildDeps \
+                    build-base \
+                    libpq-dev \
+                    libffi-dev \
+                    postgresql-dev \
+                    build-base \
+                && pip install --no-cache-dir --upgrade \
+                    --force-reinstall -r requirements.txt \
+                && apk del buildDeps
 
-ENTRYPOINT  ["scrapy", "crawl", "cmsl"]
+VOLUME      ["/var/log/cmslbot"]
 
+# expose required ports
+# 80: HTTP port for serving REST API using uWSGI
+# 6800: Telnet control port for scrapy
+# 9191: uWSGI stats port
+EXPOSE      80 6800 9191
 
+CMD             uwsgi uwsgi.yml && scrapy crawl cmsl
