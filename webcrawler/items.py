@@ -11,6 +11,7 @@ from playhouse.postgres_ext import ArrayField, TSVectorField
 from playhouse.pool import PooledPostgresqlExtDatabase
 from playhouse.shortcuts import model_to_dict
 from scrapy.utils.project import get_project_settings
+from .stopwords import strip_stopwords
 
 
 DOC_FIELD_TO_TIKA_META = {
@@ -50,6 +51,20 @@ class Parsed(scrapy.Item):
     links = scrapy.Field()
     text = scrapy.Field()
     meta = scrapy.Field()
+
+
+class SparseTextField(TextField):
+    '''
+    Use NLTK to preprocess text in order to eliminate stop words
+    and reduce data storage space
+    '''
+
+    def coerce(self, value):
+        '''
+        Strip text of stop words and redundant whitespace
+        '''
+        sparse_text = strip_stopwords(value)
+        return super().coerce(sparse_text)
 
 
 def get_db():
@@ -93,7 +108,7 @@ class Document(BaseModel):
     subject = TextField(null=True)
     title = TextField(null=True)
     type = CharField(null=True)
-    text = TextField(null=True)
+    text = SparseTextField(null=True)
     # The next field may be required for page ranking algorithm in the future
     links_to = ArrayField(CharField, default=[])
 
@@ -191,7 +206,7 @@ class Document(BaseModel):
         if type(query) is not SelectQuery:
             raise ValueError
         
-        fields_to_exclude = ['links_to', 'meta']
+        fields_to_exclude = ['links_to']
         object_list = map(
             lambda model: model_to_dict(model, exclude=fields_to_exclude), query
         )
