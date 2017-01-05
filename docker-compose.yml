@@ -1,7 +1,7 @@
 version: '2'
 services:
     cmslbot:
-        build: .
+        image: bb6xt/cmslbot
         container_name: cmslbot
         volumes:
             - "/var/log/cmslbot:/var/log/cmslbot"
@@ -17,7 +17,7 @@ services:
 
     postgres:
         image: postgres
-        container_name: postgres
+        container_name: postgresdb
         expose:
             - "5432"
         environment:
@@ -28,7 +28,7 @@ services:
 
     pgadmin4:
         image: fenglc/pgadmin4
-        container_name: pgadmin4
+        container_name: pgadmin
         expose:
             - "5050"
         ports:

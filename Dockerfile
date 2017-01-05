@@ -1,4 +1,4 @@
-FROM        alpine
+FROM        python:3.5
 MAINTAINER  aaondowasey@gmail.com
 
 LABEL       Author      = "Abraham Aondowase Yusuf"\
@@ -13,20 +13,13 @@ COPY        . /usr/src/webcrawler
 WORKDIR     /usr/src/webcrawler
 
 RUN         set -ex \
-                && apk add --no-cache \
-                    ca-certificates \
-                    libpq \
-                    python3 \
-                    py-pip \
-                && apk add --no-cache --virtual buildDeps \
-                    python3-dev \
-                    libpq-dev \
-                    libffi-dev \
-                    postgresql-dev \
-                    build-base \
-                && python3 -m pip install --no-cache-dir --upgrade \
+                && apt-get update \
+                && apt-get install -y --no-install-recommends \
+                    libpq5 libffi-dev libpq-dev \
+                && pip3 install --no-cache-dir --upgrade \
                     --force-reinstall -r requirements.txt \
-                && apk del buildDeps
+                && apt-get purge -y --auto-remove libffi-dev libpq-dev \
+                && rm -rf /var/cache/apt/*
 
 VOLUME      ["/var/log/cmslbot"]
 

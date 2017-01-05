@@ -62,7 +62,7 @@ class FTSIndexer(object):
                     )
                 )
 
-                raise DropItem
+                return None
             
             doc_fields = Document.get_fields_from_tika_metadata(item['meta'])
             doc_fields['text'] = item['text']
@@ -74,7 +74,6 @@ class FTSIndexer(object):
             return None
 
         except:
-            spider.logger.warning(
-                'Failed to index url and metadata for {}'.format(item['url']),
-                exec_info=True
+            spider.logger.exception(
+                'Failed to index url and metadata for {}'.format(item['url'])
             )
