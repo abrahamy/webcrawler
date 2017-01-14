@@ -121,7 +121,7 @@ DEFAULT_START_URLS = [
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'INFO'
-LOG_FILE = '/var/log/cmslbot/spider.log'
+LOG_FILE = '/var/log/cmsl/spider.log'
 RETRY_ENABLED = False
 REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
