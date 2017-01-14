@@ -1,8 +1,8 @@
 behave
-fake-useragent
 peewee
 psycopg2
 python-dateutil
 Scrapy
+scrapy_fake_useragent
 tika
 uwsgi
