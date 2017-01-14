@@ -8,4 +8,4 @@ uwsgi:
     threads: 2
     harakiri: 30
     stats: 127.0.0.1:9191
-    daemonize: /var/log/cmslbot/rest.log
+    daemonize: /var/log/cmsl/rest.log
