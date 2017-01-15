@@ -17,7 +17,7 @@ $ git clone https://abrahamy@bitbucket.org/abrahamy/webcrawler.git
 ```
 * Install dependencies
 ```
-$ deps="python python-dev libpq5 libffi-dev libpq-dev build-essential"
+$ deps="python python-dev libpq5 libffi-dev libpq-dev libxml2-dev build-essential"
 $ apt-get update
 $ apt-get install -y --no-install-recommends $deps
 $ wget https://bootstrap.pypa.io/get-pip.py
