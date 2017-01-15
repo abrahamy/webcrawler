@@ -15,52 +15,40 @@ $ cd /usr/src
 $ rm -rf webcrawler
 $ git clone https://abrahamy@bitbucket.org/abrahamy/webcrawler.git
 ```
-* Install dependencies
+* Install system dependencies
 ```
-$ deps="python python-dev libpq5 libffi-dev libpq-dev libxml2-dev build-essential"
+$ deps="python3.4 python3.4-dev python3.4-venv libpq5 \
+    libffi-dev libpq-dev libxml2-dev libxslt-dev build-essential"
 $ apt-get update
 $ apt-get install -y --no-install-recommends $deps
 $ wget https://bootstrap.pypa.io/get-pip.py
-$ python get-pip.py && rm get-pip.py
-$ cd webcrawler
+$ python3.4 get-pip.py && rm get-pip.py
+```
+* Create/activate virtual environment and install project requirements
+```
+$ cd /usr/src/webcrawler
+$ python3.4 -m venv --copies venv && source venv/bin/activate
 $ pip install --no-cache-dir --upgrade \
     --force-reinstall -r requirements.txt
 ```
-* Create and run Tika container
+* Create and run PostgreSQL and Tika containers
 ```
-$ docker run --name cmsl-tika-server -d -p 9998:9998 \
-    logicalspark/docker-tikaserver
-```
-* Create and run PostgreSQL container
-```
-$ dbcontainer="cmsl-database"
-$ dbuser="webcrawler"
-$ dbpass=$(tr -c -d '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()' </dev/urandom | dd bs=32 count=1 2>/dev/null)
-$ mkdir -p /var/lib/postgresql/data
-$ docker run --name $dbcontainer \
-    -e POSTGRES_USER=$dbuser POSTGRES_PASSWORD=$dbpass PGDATA=/var/lib/postgresql/data
-    -v /var/lib/postgresql/data:/var/lib/postgresql/data
-    -p 5432:5432
-    -d postgres
+$ cd /usr/src/webcrawler
+$ docker-compose --project-name=cmsl up -d
 ```
 * Initialize hstore extension on the database
 ```
-$ docker run --rm --link $dbcontainer:postgres \
-    -e PGUSER=$dbuser PGPASSWORD=$dbpass PGHOST=postgres \
+$ docker run --rm --link cmsl-database:db --net cmsl_webcrawler \
+    -e PGUSER=webcrawler PGPASSWORD=atVLkE7AW2OkaAxr PGHOST=db \
     postgres psql -c "CREATE EXTENSION IF NOT EXIST hstore;"
-```
-* Setup pgadmin container (if required)
-```
-$ docker run --name cmsl-pgadmin \
-    --link $db:postgres \
-    -p 5050:5050 \
-    -d fenglc/pgadmin4
 ```
 * Run REST server
 ```
+$ cd /usr/src/webcrawler && source venv/bin/activate
 $ uwsgi uwsgi.yml
 ```
 * Run web crawler
 ```
+$ cd /usr/src/webcrawler && source venv/bin/activate
 $ scrapy crawl cmsl
 ```

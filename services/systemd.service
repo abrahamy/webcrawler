@@ -1,0 +1,12 @@
+[Unit]
+Description=Cubic Multi Services Limited
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker start -a cmsl-tika-server cmsl-database
+ExecStop=/usr/bin/docker stop -t 2 cmsl-tika-server cmsl-database
+
+[Install]
+WantedBy=default.target
