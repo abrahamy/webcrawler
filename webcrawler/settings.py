@@ -98,7 +98,7 @@ HTTPCACHE_POLICY = 'scrapy.extensions.httpcache.RFC2616Policy'
 CMSL_BOT_DATABASE = {
     'name': 'webcrawler',
     'user': 'webcrawler',
-    'password': '^Emkw4q^m4NRBGgJS*7^*yqBO8I$ltD@',
+    'password': 'atVLkE7AW2OkaAxr',
     'host': 'localhost',
     'port': 5432
 }
