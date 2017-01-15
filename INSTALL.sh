@@ -37,7 +37,7 @@ docker pull postgres
 docker pull fenglc/pgadmin4
 
 # get project source code
-mkdir -p /usr/src /var/log/cmsl
+mkdir -p /usr/src /var/log/cmsl /var/lib/postgresql/data
 cd /usr/src
 rm -rf webcrawler
 echo "preparing to clone repository. At prompt enter bitbucket password."
