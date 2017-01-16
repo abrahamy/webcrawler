@@ -12,8 +12,8 @@ services:
         ports:
             - '5432'
         environment:
-            POSTGRES_USER: webcrawler
-            POSTGRES_PASSWORD: atVLkE7AW2OkaAxr
+            POSTGRES_USER:
+            POSTGRES_PASSWORD:
             PGDATA: /var/lib/postgresql/data
         volumes:
             - '/var/lib/postgresql/data:/var/lib/postgresql/data'
