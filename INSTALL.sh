@@ -84,8 +84,9 @@ docker-compose -f $project_root/webcrawler/docker-compose.yml \
 
 # initialize hstore extension on the database
 docker run --rm --link cmsl-database:db --net cmsl_webcrawler \
-    -e PGUSER=$POSTGRES_USER PGPASSWORD=$POSTGRES_PASSWORD PGHOST=db \
-    postgres psql -c $sql_query
+    -e PGUSER=$POSTGRES_USER \
+    -e PGPASSWORD=$POSTGRES_PASSWORD \
+    -e PGHOST=db postgres psql -c $sql_query
 
 # run REST server
 uwsgi uwsgi.yml
