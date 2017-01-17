@@ -17,18 +17,6 @@ build_deps=" \
     libpq5 libffi-dev libpq-dev libxml2-dev \
     libxslt-dev build-essential \
 "
-sql_query="\
--- enable hstore extension on the database \
-CREATE EXTENSION IF NOT EXISTS hstore; \
--- create a user with read-only access to the database \
-CREATE ROLE cmsl WITH LOGIN ENCRYPTED PASSWORD 'cmslpass'; \
-GRANT CONNECT ON DATABASE $POSTGRES_USER TO cmsl; \
-GRANT USAGE ON SCHEMA public TO cmsl; \
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO cmsl; \
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO cmsl; \
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO cmsl; \
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO cmsl; \
-"
 
 # install docker
 apt-get update
@@ -51,11 +39,10 @@ chmod +x /usr/local/bin/docker-compose
 # pull tika server docker image
 docker pull logicalspark/docker-tikaserver
 
-# pull PostgreSQL docker image
-docker pull postgres
-
-# pull pgadmin4 docker image
-docker pull fenglc/pgadmin4
+# install PostgreSQL
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $ubuntu_version-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+apt-get update
+apt-get install postgresql postgresql-contrib
 
 # get project source code
 mkdir -p $project_root $log_path $pg_data
@@ -69,16 +56,15 @@ sed -ie "s/super-secret-password/$POSTGRES_PASSWORD/g" $settings_module
 
 # install system dependencies
 apt-get install -y --no-install-recommends $build_deps
-wget https://bootstrap.pypa.io/get-pip.py
+curl -L https://bootstrap.pypa.io/get-pip.py > get-pip.py
 $python_version get-pip.py && rm get-pip.py
 
 # create/activate virtual environment and install project requirements
 cd $project_root/webcrawler
 $python_version -m venv --copies venv && source venv/bin/activate
-$python_version -m pip install --upgrade --force-reinstall \
-    -r requirements.txt
+$python_version -m pip install -r requirements.txt
 
-# create and run PostgreSQL and Tika containers
+# create and run tikaserver containers
 docker-compose -f $project_root/webcrawler/docker-compose.yml \
     --project-name=cmsl up -d
 

@@ -2,31 +2,6 @@ version: '2'
 services:
     tika:
         image: logicalspark/docker-tikaserver
-        container_name: cmsl-tika-server
+        container_name: tika-server
         ports:
-            - '9998'
-
-    postgres:
-        image: postgres
-        container_name: cmsl-database
-        ports:
-            - '0.0.0.0:5432:5432'
-        environment:
-            POSTGRES_USER:
-            POSTGRES_PASSWORD:
-            PGDATA: /var/lib/postgresql/data
-        volumes:
-            - '/var/lib/postgresql/data:/var/lib/postgresql/data'
-        networks:
-            - webcrawler
-
-    pgadmin4:
-        image: fenglc/pgadmin4
-        container_name: pgadmin
-        ports:
-            - "0.0.0.0:5050:5050"
-        links:
-            - "postgres"
-
-networks:
-    webcrawler:
+            - '9998:9998'

@@ -100,7 +100,7 @@ CMSL_BOT_DATABASE = {
     'user': 'webcrawler',
     'password': 'super-secret-password',
     'host': 'localhost',
-    'port': 5432
+    'port': 5433
 }
 
 DEFAULT_START_URLS = [

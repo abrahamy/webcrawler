@@ -5,8 +5,8 @@ After=docker.service
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/docker start -a cmsl-tika-server cmsl-database
-ExecStop=/usr/bin/docker stop -t 2 cmsl-tika-server cmsl-database
+ExecStart=/usr/bin/docker start tika-server
+ExecStop=/usr/bin/docker stop -t 2 tika-server
 
 [Install]
 WantedBy=default.target
