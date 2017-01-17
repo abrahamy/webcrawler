@@ -75,8 +75,8 @@ $python_version get-pip.py && rm get-pip.py
 # create/activate virtual environment and install project requirements
 cd $project_root/webcrawler
 $python_version -m venv --copies venv && source venv/bin/activate
-$python_version -m pip --no-cache-dir install --upgrade \
-    --force-reinstall -r requirements.txt
+$python_version -m pip install --upgrade --force-reinstall \
+    -r requirements.txt
 
 # create and run PostgreSQL and Tika containers
 docker-compose -f $project_root/webcrawler/docker-compose.yml \
