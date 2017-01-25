@@ -34,7 +34,7 @@ CONCURRENT_REQUESTS = 200
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 0.25
-DOWNLOAD_TIMEOUT = 15
+DOWNLOAD_TIMEOUT = 300 #prod=15
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 8
 # CONCURRENT_REQUESTS_PER_IP = 0
@@ -93,7 +93,7 @@ ITEM_PIPELINES = {
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 24 * 60 * 60 # cache for 24 hours
+HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60 # prod=24 * 60 * 60 # cache for 24 hours
 HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
@@ -129,7 +129,7 @@ DEFAULT_START_URLS = [
 LOG_LEVEL = 'INFO'
 LOG_FILE = os.path.join(CMSL_PROJECT_ROOT, 'logs', 'spider.log')
 RETRY_ENABLED = False
-REDIRECT_ENABLED = False
+REDIRECT_ENABLED = True # prod=False
 AJAXCRAWL_ENABLED = True
 REACTOR_THREADPOOL_MAXSIZE = 50
 
