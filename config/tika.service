@@ -1,5 +1,5 @@
 [Unit]
-Description=Cubic Multi Services Limited
+Description=Apache Tika Server
 Requires=docker.service
 After=docker.service
 

@@ -1,0 +1,11 @@
+[Unit]
+Description=CMSL Web Crawler
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+Restart=always
+ExecStart=/opt/webcrawler/entrypoint.sh
+
+[Install]
+WantedBy=default.target
