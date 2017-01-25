@@ -9,6 +9,12 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+import os
+
+CMSL_PROJECT_ROOT = os.path.abspath(
+    os.path.dirname(os.path.dirname(__file__))
+)
+
 BOT_NAME = 'CMSL Bot'
 
 SPIDER_MODULES = ['webcrawler.spiders']
@@ -100,7 +106,7 @@ CMSL_BOT_DATABASE = {
     'user': 'webcrawler',
     'password': 'super-secret-password',
     'host': 'localhost',
-    'port': 5433
+    'port': 5432
 }
 
 DEFAULT_START_URLS = [
@@ -121,7 +127,7 @@ DEFAULT_START_URLS = [
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'INFO'
-LOG_FILE = '/var/log/cmsl/spider.log'
+LOG_FILE = os.path.join(CMSL_PROJECT_ROOT, 'logs', 'spider.log')
 RETRY_ENABLED = False
 REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
