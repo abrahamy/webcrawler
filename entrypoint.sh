@@ -1,2 +1,2 @@
-. /usr/local/bin/uwsgi /opt/webcrawler/config/uwsgi.yml
-. /usr/bin/python3.4 /opt/webcrawler/main.py
+uwsgi config/uwsgi.yml
+nohup python3.4 main.py > /dev/null 2>&1 &
