@@ -206,10 +206,22 @@ class Document(BaseModel):
         if type(query) is not SelectQuery:
             raise ValueError
         
-        fields_to_exclude = ['links_to']
-        object_list = map(
-            lambda model: model_to_dict(model, exclude=fields_to_exclude), query
-        )
+        object_list = []
+        for model in query:
+            model_dict = {
+                'url': model.url,
+                'content_type': model.content_type,
+                'format': model.format,
+                'language': model.language,
+                'title': model.title,
+                'subject': model.subject,
+                'description': model.description,
+                'creator': model.creator,
+                'created': model.created,
+                'modified': model.modified
+            }
+
+            object_list.append(model_dict)
         
         return json.dumps(list(object_list))
 
