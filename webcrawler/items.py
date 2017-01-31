@@ -78,12 +78,6 @@ def get_db():
 
 class BaseModel(Model):
 
-    def save(self, **kwargs):
-        if not self.table_exists():
-            self.create_table()
-        
-        return super().save(**kwargs)
-
     class Meta:
         database = get_db()
 
@@ -235,3 +229,15 @@ class Search(BaseModel):
     contributor = TSVectorField(null=True)
     publisher = TSVectorField(null=True)
     text = TSVectorField(null=True)
+
+
+def create_schema(models):
+    '''Create tables for the given models if non existent'''
+    if not isinstance(models, (list, tuple)):
+        raise TypeError
+    
+    if len(models):
+        database = models[0]._meta.database
+
+        with database.atomic():
+            database.create_tables(models, safe=True)
