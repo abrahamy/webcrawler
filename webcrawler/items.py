@@ -114,13 +114,14 @@ class Document(BaseModel):
         try:
             instance = super().create(**query)
         except IntegrityError as e:
+            cls._meta.database.rollback()
             instance = Document.select(Document.url==query.pop('url')).get()
             instance.update(**query)
-        
+
         instance.create_search_model()
-        
+
         return instance
-    
+
     def create_search_model(self):
         '''
         Creates a full text searchable model derived from this instance
@@ -139,10 +140,11 @@ class Document(BaseModel):
         try:
             return Search.create(**fields)
         except IntegrityError as e:
+            self._meta.database.rollback()
             search = Search.select(Search.document==self).get()
             search.update(**fields)
             return search
-    
+
     @staticmethod
     def get_fields_from_tika_metadata(metadata):
         fields = {}
@@ -157,7 +159,7 @@ class Document(BaseModel):
                         break
             else:
                 fields[key] = metadata.get(value)
-        
+
         # parse the datetime strings from tika metadata into
         # python datetime objects
         date_fields = ['created', 'date', 'modified']
@@ -165,7 +167,7 @@ class Document(BaseModel):
             value = fields[field]
             if value and isinstance(value, str):
                 fields[field] = parse(value)
-        
+
         return fields
 
     @staticmethod
@@ -189,9 +191,9 @@ class Document(BaseModel):
 
         if return_json:
             return Document.to_json(query)
-        
+
         return query
-    
+
     @staticmethod
     def to_json(query):
         '''
@@ -199,7 +201,7 @@ class Document(BaseModel):
         '''
         if type(query) is not SelectQuery:
             raise ValueError
-        
+
         object_list = []
         for model in query:
             model_dict = {
@@ -216,7 +218,7 @@ class Document(BaseModel):
             }
 
             object_list.append(model_dict)
-        
+
         return json.dumps(list(object_list))
 
 
@@ -235,7 +237,7 @@ def create_schema(models):
     '''Create tables for the given models if non existent'''
     if not isinstance(models, (list, tuple)):
         raise TypeError
-    
+
     if len(models):
         database = models[0]._meta.database
 
