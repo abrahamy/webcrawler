@@ -1,7 +1,0 @@
-version: '2'
-services:
-    tika:
-        image: logicalspark/docker-tikaserver
-        container_name: tika-server
-        ports:
-            - '9998:9998'
