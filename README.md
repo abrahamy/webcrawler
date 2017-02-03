@@ -1,54 +1,61 @@
 Installation
 ============
 
-* Install [docker](https://docs.docker.com/engine/installation/linux/ubuntulinux/ "Install Docker on Ubuntu - Docker")
-* Pull [tika server](https://store.docker.com/community/images/logicalspark/docker-tikaserver "Docker Store") image from Docker Store
-`$ docker pull logicalspark/docker-tikaserver`
-* Pull [postgres](https://store.docker.com/images/022689bf-dfd8-408f-9e1c-19acac32e57b?tab=description "postgres - Docker Store") image from Docker Store
-`$ docker pull postgres`
-* Pull [pgadmin4](https://store.docker.com/community/images/fenglc/pgadmin4 "Docker Store") image from Docker Store
-`$ docker pull fenglc/pgadmin4`
-* Get project source code
-```
-$ mkdir -p /usr/src /var/log/cmsl
-$ cd /usr/src
-$ rm -rf webcrawler
-$ git clone https://abrahamy@bitbucket.org/abrahamy/webcrawler.git
-```
 * Install system dependencies
 ```
-$ deps="python3.4 python3.4-dev python3.4-venv libpq5 \
-    libffi-dev libpq-dev libxml2-dev libxslt-dev build-essential"
-$ apt-get update
-$ apt-get install -y --no-install-recommends $deps
-$ wget https://bootstrap.pypa.io/get-pip.py
-$ python3.4 get-pip.py && rm get-pip.py
+$ apt update
+$ apt install -y apt-transport-https ca-certificates python3 \
+    python3-dev python3-venv build-essential libpq5 libffi-dev \
+    libpq-dev libxml2-dev libxslt-dev libssl-dev curl
 ```
-* Create/activate virtual environment and install project requirements
+* Download and configure Tika server
 ```
-$ cd /usr/src/webcrawler
-$ python3.4 -m venv --copies venv && source venv/bin/activate
-$ pip install --no-cache-dir --upgrade \
-    --force-reinstall -r requirements.txt
+$ TIKA_VERSION=1.14
+$ TIKA_SERVER_URL=https://www.apache.org/dist/tika/tika-server-$TIKA_VERSION.jar
+$ apt install -y openjdk-8-jre-headless gdal-bin tesseract-ocr \
+    tesseract-ocr-eng tesseract-ocr-ita tesseract-ocr-fra \
+    tesseract-ocr-spa tesseract-ocr-deu
+$ mkdir -p /opt/tikaserver
+$ curl -sSL https://people.apache.org/keys/group/tika.asc | gpg --import -
+$ curl -sSL "$TIKA_SERVER_URL.asc" -o /opt/tikaserver/tika-server-${TIKA_VERSION}.jar.asc
+$ curl -sSL "$TIKA_SERVER_URL" -o /opt/tikaserver/tika-server-${TIKA_VERSION}.jar
 ```
-* Create and run PostgreSQL and Tika containers
+* Install PostgreSQL database
 ```
-$ cd /usr/src/webcrawler
-$ docker-compose --project-name=cmsl up -d
+$ UBUNTU_VERSION=xenial # or trusty or precise
+$ echo "deb http://apt.postgresql.org/pub/repos/apt/ $UBUNTU_VERSION-pgdg main" \
+    | tee /etc/apt/sources.list.d/pgdg.list
+$ curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+$ apt update && apt install -y postgresql postgresql-contrib
 ```
-* Initialize hstore extension on the database
+* Initialize the webcrawler database
 ```
-$ docker run --rm --link cmsl-database:db --net cmsl_webcrawler \
-    -e PGUSER=webcrawler PGPASSWORD=atVLkE7AW2OkaAxr PGHOST=db \
-    postgres psql -c "CREATE EXTENSION IF NOT EXIST hstore;"
+$ DB_PASSWORD=$(tr -c -d '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' </dev/urandom | dd bs=32 count=1 2>/dev/null;)
+$ DB_SCRIPT=" \
+        CREATE DATABASE IF NOT EXIST webcrawler; \
+        CREATE EXTENSION IF NOT EXIST hstore; \
+        ALTER ROLE postgres WITH ENCRYPTED PASSWORD "$DB_PASSWORD"; \
+    "
+$ sudo -u postgres psql -c $DB_SCRIPT
 ```
-* Run REST server
+* Download the source code from bitbucket and install Python dependencies
 ```
-$ cd /usr/src/webcrawler && source venv/bin/activate
-$ uwsgi uwsgi.yml
+$ cd /opt && git clone https://abrahamy@bitbucket.org/abrahamy/webcrawler.git
+$ cd webcrawler
+$ curl -sSL https://bootstrap.pypa.io/get-pip.py | python3 -
+$ python3 -m venv --copies venv
+$ source venv/bin/activate
+$ pip install -r requirements.txt
 ```
-* Run web crawler
+* Install and configure supervisor to run the services at bootup
 ```
-$ cd /usr/src/webcrawler && source venv/bin/activate
-$ scrapy crawl cmsl
+$ apt install -y supervisor
+$ cp /opt/webcrawler/config/supervisor.conf /etc/supervisor/conf.d/cmsl.conf
+```
+* Restart server and verify that Tika server, REST api and crawler are started
+```
+$ reboot
+----
+$ curl -X GET http://localhost:9998 # check tikaserver
+$ curl -X GET http://localhost/ # check REST api
 ```
