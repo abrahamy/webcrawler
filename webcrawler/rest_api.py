@@ -3,7 +3,7 @@ import hug
 from webcrawler.items import Document
 
 
-@hug.get()
+@hug.get(response_headers={'Access-Control-Allow-Origin': '*'})
 def search(term: hug.types.text, page: hug.types.number=1, items: hug.types.number=20):
     '''
     Search for documents that match the given term
