@@ -219,7 +219,7 @@ class Document(BaseModel):
 
             object_list.append(model_dict)
 
-        return json.dumps(list(object_list), indent=2)
+        return json.dumps(list(object_list))
 
 
 class Search(BaseModel):
