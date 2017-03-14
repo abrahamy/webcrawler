@@ -3,12 +3,10 @@
 import json, scrapy
 from dateutil.parser import parse
 from peewee import (
-    CharField, DateTimeField, TextField, ForeignKeyField,
-    Model, SelectQuery, fn, IntegrityError
+    CharField, CompositeKey, create_model_tables, DateTimeField, TextField,
+    FloatField, Model, SelectQuery, SQL, IntegrityError
 )
-from playhouse.db_url import connect
-from playhouse.postgres_ext import ArrayField, TSVectorField
-from playhouse.pool import PooledPostgresqlExtDatabase
+from playhouse.pool import PooledMySQLDatabase
 from playhouse.shortcuts import model_to_dict
 from scrapy.utils.project import get_project_settings
 from .stopwords import strip_stopwords
@@ -70,7 +68,7 @@ class SparseTextField(TextField):
 def get_db():
     '''Create a new database connection'''
     db_settings = get_project_settings().getdict('CMSL_BOT_DATABASE')
-    return PooledPostgresqlExtDatabase(
+    return PooledMySQLDatabase(
         db_settings.pop('name'),
         **db_settings
     )
@@ -103,8 +101,8 @@ class Document(BaseModel):
     title = TextField(null=True)
     type = CharField(null=True)
     text = SparseTextField(null=True)
-    # The next field may be required for page ranking algorithm in the future
-    links_to = ArrayField(CharField, default=[])
+    # The page rank will be computed and be stored in the following field
+    page_rank = FloatField(default=0.0)
 
     @classmethod
     def create(cls, **query):
@@ -118,32 +116,7 @@ class Document(BaseModel):
             instance = Document.select(Document.url==query.pop('url')).get()
             instance.update(**query)
 
-        instance.create_search_model()
-
         return instance
-
-    def create_search_model(self):
-        '''
-        Creates a full text searchable model derived from this instance
-        '''
-        fields = {
-            'document': self,
-            'subject': fn.to_tsvector(self.subject),
-            'title': fn.to_tsvector(self.title),
-            'description': fn.to_tsvector(self.description),
-            'creator': fn.to_tsvector(self.creator),
-            'contributor': fn.to_tsvector(self.contributor),
-            'publisher': fn.to_tsvector(self.publisher),
-            'text': fn.to_tsvector(self.text)
-        }
-        # if the Document already have a Search model update that instead
-        try:
-            return Search.create(**fields)
-        except IntegrityError as e:
-            self._meta.database.rollback()
-            search = Search.select(Search.document==self).get()
-            search.update(**fields)
-            return search
 
     @staticmethod
     def get_fields_from_tika_metadata(metadata):
@@ -178,16 +151,13 @@ class Document(BaseModel):
         '''
         query = (Document
                     .select()
-                    .join(Search, on=Search.document)
-                    .where(
-                        Search.text.match(term) |
-                        Search.subject.match(term) |
-                        Search.title.match(term) |
-                        Search.description.match(term) |
-                        Search.creator.match(term) |
-                        Search.contributor.match(term) |
-                        Search.publisher.match(term)
-                    ).paginate(page_number, items_per_page))
+                    .where(SQL(
+                        '''MATCH (
+                            `text`, subject, title, description,
+                            creator, contributor, publisher
+                        ) AGAINST (%s IN NATURAL LANGUAGE MODE)
+                        ''', term
+                    )).paginate(page_number, items_per_page))
 
         if return_json:
             return Document.to_json(query)
@@ -220,26 +190,31 @@ class Document(BaseModel):
             object_list.append(model_dict)
 
         return json.dumps(list(object_list))
+    
+    class Meta:
+        constraints = [
+            SQL("FULLTEXT(`text`, subject, title, description, creator, contributor, publisher)")
+        ]
 
 
-class Search(BaseModel):
-    document = ForeignKeyField(Document, unique=True)
-    subject = TSVectorField(null=True)
-    title = TSVectorField(null=True)
-    description = TSVectorField(null=True)
-    creator = TSVectorField(null=True)
-    contributor = TSVectorField(null=True)
-    publisher = TSVectorField(null=True)
-    text = TSVectorField(null=True)
+class Link(BaseModel):
+    src_url = CharField(unique=True)
+    dest_url = CharField()
+
+    @classmethod
+    def populate(cls, source_url, outgoing_urls):
+        '''Store the links from the source_url in the database'''
+        data = [
+            {'src_url': source_url, 'dest_url': i} for i in outgoing_urls
+        ]
+
+        with cls._meta.database.atomic():
+            cls.delete().where(cls.src_url == source_url).execute()
+            cls.insert_many(data).execute()
+
+    class Meta:
+        primary_key = CompositeKey('src_url', 'dst_url')
 
 
-def create_schema(models):
-    '''Create tables for the given models if non existent'''
-    if not isinstance(models, (list, tuple)):
-        raise TypeError
-
-    if len(models):
-        database = models[0]._meta.database
-
-        with database.atomic():
-            database.create_tables(models, safe=True)
+def initialize_database():
+    create_model_tables([Document, Link], fail_silently=True)
