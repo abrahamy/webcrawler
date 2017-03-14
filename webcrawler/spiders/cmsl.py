@@ -65,4 +65,4 @@ class CmslSpider(CrawlSpider):
         link_extractor = LinkExtractor(deny_domains=domain)
         links = map(lambda link: link.url, link_extractor.extract_links(response))
 
-        return list(links)
+        return set(links)
