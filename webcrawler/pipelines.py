@@ -3,7 +3,7 @@
 import os
 from tika import tika, parser
 from scrapy.exceptions import DropItem
-from webcrawler.items import Document, Link, Item, Parsed
+from webcrawler.items import Document, Item, Parsed
 
 
 tika.TikaClientOnly = True
@@ -68,8 +68,8 @@ class FTSIndexer(object):
             doc_fields['text'] = item['text']
             doc_fields['url'] = item['url']
 
-            Document.create(**doc_fields)
-            Link.populate(item['url'], item['links'])
+            doc = Document.create(**doc_fields)
+            doc.add_links(item['links'])
 
             return None
 
