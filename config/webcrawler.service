@@ -1,0 +1,10 @@
+[Unit]
+Description=Webcrawler Service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/crawler
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
