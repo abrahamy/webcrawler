@@ -20,5 +20,9 @@ def start_crawl():
     deferred.addBoth(lambda _: start_crawl())
 
 
-start_crawl()
-reactor.run()
+def main():
+    start_crawl()
+    reactor.run()
+
+if __name__ == '__main__':
+    main()

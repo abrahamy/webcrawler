@@ -23,9 +23,11 @@ params = {
     'package_data': {
         'webcrawler': ['starturls.txt', '../LICENSE']
     },
-    'scripts': [
-        'crawler'
-    ],
+    'entry_points': {
+        'console_scripts': [
+            'crawler = webcrawler.run:main',
+        ],
+    },
     'data_files': [
         ('/etc/', ['scrapy.cfg'])
     ],
