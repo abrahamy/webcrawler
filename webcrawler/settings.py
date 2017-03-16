@@ -11,12 +11,11 @@
 
 import os
 
-CMSL_PROJECT_ROOT = os.path.abspath(
-    os.path.dirname(os.path.dirname(__file__))
-)
 
 def read_start_urls():
-    filename = os.path.join(CMSL_PROJECT_ROOT, 'config', 'starturls.txt')
+    filename = os.path.join(
+        os.path.dirname(__file__), 'starturls.txt'
+    )
 
     dirty_urls = []
     with open(filename) as fp:
@@ -132,7 +131,7 @@ DEFAULT_START_URLS = read_start_urls()
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'ERROR'
-LOG_FILE = os.path.join(CMSL_PROJECT_ROOT, 'logs', 'spider.log')
+LOG_FILE = '/var/log/crawler.log'
 RETRY_ENABLED = False
 REDIRECT_ENABLED = True # prod=False
 AJAXCRAWL_ENABLED = True
