@@ -1,6 +1,10 @@
 #!/usr/bin/env python
-
+import os
 from setuptools import setup
+
+
+def read(filename):
+    return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
 
 params = {
@@ -9,6 +13,7 @@ params = {
     'description': 'A web crawler bot',
     'author': 'Abraham Aondowase Yusuf',
     'author_email': 'aaondowasey@gmail.com',
+    'license': read('LICENSE'),
     'url': 'https://bitbucket.org/abrahamy/webcrawler.git',
     'packages': ['webcrawler', 'webcrawler.spiders'],
     'package_dir': {
@@ -16,8 +21,7 @@ params = {
         'webcrawler.spiders': 'webcrawler/spiders'
     },
     'package_data': {
-        '': ['LICENSE',],
-        'webcrawler': ['starturls.txt',]
+        'webcrawler': ['starturls.txt', '../LICENSE']
     },
     'scripts': [
         'crawler'
