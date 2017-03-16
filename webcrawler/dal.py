@@ -83,7 +83,7 @@ class Document(peewee.Model):
             instance = super().create(**query)
         except peewee.IntegrityError as e:
             cls._meta.database.rollback()
-            instance = cls.select().where(cls.url==query.pop('url'))
+            instance = cls.select().where(cls.url==query.pop('url')).get()
             instance.update(**query)
 
         return instance
