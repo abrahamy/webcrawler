@@ -15,6 +15,24 @@ CMSL_PROJECT_ROOT = os.path.abspath(
     os.path.dirname(os.path.dirname(__file__))
 )
 
+def read_start_urls():
+    filename = os.path.join(CMSL_PROJECT_ROOT, 'config', 'starturls.txt')
+
+    dirty_urls = []
+    with open(filename) as fp:
+        dirty_urls = fp.readlines()
+    
+    urls = []
+    for url in dirty_urls:
+        url = url.strip()
+
+        if url.startswith('#') or len(url) == 0:
+            continue
+        
+        urls.append(url)
+    
+    return urls
+
 BOT_NAME = 'CMSL Bot'
 
 SPIDER_MODULES = ['webcrawler.spiders']
@@ -109,20 +127,7 @@ CMSL_BOT_DATABASE = {
     'port': 3306
 }
 
-DEFAULT_START_URLS = [
-    'http://www.nairaland.com/',
-    'http://www.lindaikejisblog.com/',
-    'https://www.reddit.com/',
-    'https://news.ycombinator.com/',
-    'http://botid.org/',
-    'http://www.dirjournal.com/',
-    'http://www.jayde.com/',
-    'http://www.dmoz.org/',
-    'http://vlib.org/',
-    'http://www.business.com/',
-    'https://botw.org/',
-    'http://www.stpt.com/directory/',
-]
+DEFAULT_START_URLS = read_start_urls()
 
 # The settings from this point to EOF are especially
 # important for broad crawls

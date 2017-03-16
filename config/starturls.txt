@@ -1,0 +1,15 @@
+# START URLS
+# List all start urls here
+# Format: 1 url per line
+http://www.nairaland.com/
+http://www.lindaikejisblog.com/
+https://www.reddit.com/
+https://news.ycombinator.com/
+http://botid.org/
+http://www.dirjournal.com/
+http://www.jayde.com/
+http://www.dmoz.org/
+http://vlib.org/
+http://www.business.com/
+https://botw.org/
+http://www.stpt.com/directory/
