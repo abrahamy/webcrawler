@@ -1,18 +1,20 @@
 #!/usr/bin/python3
-from scrapy.crawler import CrawlerProcess
+from twisted.internet import reactor
+from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 from webcrawler.spiders.cmsl import CmslSpider
-from webcrawler.items import initialize_database
-#<-- Remove
-import logging
-logger = logging.getLogger('peewee')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
-# --/>
+from webcrawler.dal import Document
 
-initialize_database()
 
-crawler = CrawlerProcess(get_project_settings())
+Document.create_table(fail_silently=True)
+crawler = CrawlerRunner(get_project_settings())
 
-crawler.crawl(CmslSpider)
-crawler.start()
+
+def start_crawl():
+    global crawler
+    deferred = crawler.crawl(CmslSpider)
+    deferred.addBoth(lambda _: start_crawl())
+
+
+start_crawl()
+reactor.run()

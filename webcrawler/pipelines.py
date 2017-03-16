@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import datetime
 from tika import tika, parser
 from scrapy.exceptions import DropItem
-from webcrawler.items import Document, Item, Parsed
+from webcrawler.items import Item, Parsed
+from webcrawler.dal import Document
 
 
 tika.TikaClientOnly = True
@@ -67,9 +69,10 @@ class FTSIndexer(object):
             doc_fields = Document.get_fields_from_tika_metadata(item['meta'])
             doc_fields['text'] = item['text']
             doc_fields['url'] = item['url']
+            doc_fields['crawl_date'] = datetime.datetime.now()
+            doc_fields['links'] = item['links']
 
-            doc = Document.create(**doc_fields)
-            doc.add_links(item['links'])
+            Document.create(**doc_fields)
 
             return None
 
