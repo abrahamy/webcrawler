@@ -50,7 +50,7 @@ params = {
         'webcrawler.spiders': 'webcrawler/spiders'
     },
     'package_data': {
-        'webcrawler': ['starturls.txt', '../LICENSE']
+        'webcrawler': ['starturls.txt', '../LICENSE', '../config/*.service']
     },
     'scripts': ['crawler'],
     'data_files': [
