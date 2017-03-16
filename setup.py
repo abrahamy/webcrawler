@@ -10,8 +10,11 @@ params = {
     'author': 'Abraham Aondowase Yusuf',
     'author_email': 'aaondowasey@gmail.com',
     'url': 'https://bitbucket.org/abrahamy/webcrawler.git',
-    'packages': ['webcrawler',],
-    'package_dir': {'webcrawler': 'webcrawler'},
+    'packages': ['webcrawler', 'webcrawler.spiders'],
+    'package_dir': {
+        'webcrawler': 'webcrawler',
+        'webcrawler.spiders': 'webcrawler/spiders'
+    },
     'package_data': {
         '': ['LICENSE',],
         'webcrawler': ['starturls.txt',]
