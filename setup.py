@@ -55,7 +55,7 @@ params = {
     'scripts': ['crawler'],
     'data_files': [
         ('/etc/', ['scrapy.cfg']),
-        ('/etc/systemd/system', [''])
+        ('/etc/systemd/system', ['config/webcrawler.service'])
     ],
     'install_requires': [
         'peewee==2.9.1',
