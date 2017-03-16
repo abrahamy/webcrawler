@@ -131,7 +131,7 @@ DEFAULT_START_URLS = read_start_urls()
 
 # The settings from this point to EOF are especially
 # important for broad crawls
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'ERROR'
 LOG_FILE = os.path.join(CMSL_PROJECT_ROOT, 'logs', 'spider.log')
 RETRY_ENABLED = False
 REDIRECT_ENABLED = True # prod=False

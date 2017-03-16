@@ -2,12 +2,16 @@
 from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
+from scrapy.utils.log import configure_logging
 from webcrawler.spiders.cmsl import CmslSpider
 from webcrawler.dal import Document
 
 
 Document.create_table(fail_silently=True)
-crawler = CrawlerRunner(get_project_settings())
+
+settings = get_project_settings()
+configure_logging(settings)
+crawler = CrawlerRunner(settings)
 
 
 def start_crawl():
