@@ -2,7 +2,7 @@
 import os
 import sys
 import subprocess
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.install import install
 
 
@@ -38,13 +38,13 @@ def read(filename):
 
 params = {
     'name': 'webcrawler',
-    'version': '1.0.2',
+    'version': '1.0.3',
     'description': 'A web crawler bot',
     'author': 'Abraham Aondowase Yusuf',
     'author_email': 'aaondowasey@gmail.com',
     'license': read('LICENSE'),
     'url': 'https://bitbucket.org/abrahamy/webcrawler.git',
-    'packages': ['webcrawler', 'webcrawler.spiders'],
+    'packages': find_packages(exclude=["features/*"]),
     'package_dir': {
         'webcrawler': 'webcrawler',
         'webcrawler.spiders': 'webcrawler/spiders'
