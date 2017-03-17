@@ -37,7 +37,7 @@ def read(filename):
 
 
 params = {
-    'name': 'Webcrawler',
+    'name': 'webcrawler',
     'version': '1.0.1',
     'description': 'A web crawler bot',
     'author': 'Abraham Aondowase Yusuf',
