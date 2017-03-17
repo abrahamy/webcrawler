@@ -3,6 +3,7 @@ Description=Webcrawler Service
 
 [Service]
 Type=simple
+Environment=SCRAPY_SETTINGS_MODULE=webcrawler.settings
 ExecStart=/usr/local/bin/crawler
 Restart=always
 

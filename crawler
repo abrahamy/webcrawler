@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+import os
+
+os.environ.putenv('SCRAPY_SETTINGS_MODULE', 'webcrawler.settings')
+
 from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
