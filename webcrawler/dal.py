@@ -3,7 +3,7 @@ import peewee
 from peewee import SQL
 from playhouse.pool import PooledMySQLDatabase
 from dateutil.parser import parse as parse_date
-from scrapy.utils.project import get_project_settings
+from .settings import CMSL_BOT_DATABASE as db_settings
 
 
 DOC_FIELD_TO_TIKA_META = {
@@ -24,7 +24,7 @@ DOC_FIELD_TO_TIKA_META = {
 
 def get_db():
     '''Create a new database connection'''
-    db_settings = get_project_settings().getdict('CMSL_BOT_DATABASE')
+    global db_settings
     return PooledMySQLDatabase(
         db_settings.pop('name'),
         **db_settings
