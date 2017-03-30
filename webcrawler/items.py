@@ -10,6 +10,7 @@ class Item(scrapy.Item):
     url = scrapy.Field()
     temp_filename = scrapy.Field()
     links = scrapy.Field()
+    media_urls = scrapy.Field()
 
 
 class Parsed(scrapy.Item):
@@ -17,3 +18,4 @@ class Parsed(scrapy.Item):
     links = scrapy.Field()
     text = scrapy.Field()
     meta = scrapy.Field()
+    media = scrapy.Field()

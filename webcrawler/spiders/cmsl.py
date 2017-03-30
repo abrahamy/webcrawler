@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
 import tempfile
+import mimetypes
 import scrapy
 from urllib.parse import urlparse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.utils.project import get_project_settings
 from webcrawler.items import Item
-
-
-# configure LinkExtractor to extract EVERY link!!!
-link_extractor = LinkExtractor(
-    tags=('a', 'area', 'img', 'source', 'track', 'embed'),
-    attrs=('href', 'src'), deny_extensions=()
-)
 
 
 def get_start_urls():
@@ -23,11 +17,25 @@ def get_start_urls():
     return settings.getlist('DEFAULT_START_URLS')
 
 
+def is_mimetype(category, url):
+    '''
+    Return True if the url belongs to the mimetype category
+    @param (category) eg. application, audio, video, etc 
+    '''
+    ok = False
+
+    if url:
+        mimetype, _ = mimetypes.guess_type(url)
+        ok = isinstance(mimetype, str) and mimetype.startswith(category)
+    
+    return ok
+
+
 class CmslSpider(CrawlSpider):
     name = 'cmsl'
     start_urls = get_start_urls()
     rules = (
-        Rule(link_extractor, callback='parse_item', follow=True),
+        Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
 
     def parse_item(self, response):
@@ -37,7 +45,8 @@ class CmslSpider(CrawlSpider):
         try:
             fields = {
                 'url': response.url,
-                'links': self.extract_external_links(response)
+                'links': self.extract_external_links(response),
+                'media_urls': self.extract_media(response)
             }
 
             with tempfile.NamedTemporaryFile(delete=False) as stream:
@@ -66,3 +75,36 @@ class CmslSpider(CrawlSpider):
         links = map(lambda link: link.url, link_extractor.extract_links(response))
 
         return set(links)
+    
+    @staticmethod
+    def extract_media(response):
+        '''
+        Extract the urls of all media (audios, images, videos) on this page
+        '''
+        if not isinstance(response, scrapy.http.HtmlResponse):
+            return {}
+        
+        # extract urls from audio, embed and video tags
+        media_urls = response.css(
+            'audio, audio source, embed, video, video source'
+        ).xpath('@src').extract()
+
+        # extract urls from object tag
+        media_urls.extend(
+            response.css('object').xpath('@data').extract()
+        )
+
+        # extract urls from param tag nested within an object tag
+        media_urls.extend(
+            response.css('object param[name="src"]').xpath('@value').extract()
+        )
+
+        images = response.css('img').xpath('@src').extract()
+        audios = list(filter(lambda i: is_mimetype('audio', i), media_urls))
+        videos = list(filter(lambda i: is_mimetype('video', i), media_urls))
+        
+        return {
+            'images': set(images),
+            'audios': set(audios),
+            'videos': set(videos)
+        }

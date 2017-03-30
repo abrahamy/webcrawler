@@ -55,7 +55,16 @@ class SetField(peewee.TextField):
         return set(value.split(';'))
 
 
-class Document(peewee.Model):
+class BaseModel(peewee.Model):
+    '''
+    Base model for all peewee models
+    '''
+
+    class Meta:
+        database = get_db()
+
+
+class Document(BaseModel):
     url = peewee.CharField(unique=True)
     crawl_date = peewee.DateTimeField()
     content_type = peewee.CharField(null=True)
@@ -161,11 +170,19 @@ class Document(peewee.Model):
         return json.dumps(object_list)
     
     class Meta:
-        database = get_db()
         constraints = [
             SQL("FULLTEXT(`text`, subject, title, description, creator, publisher)")
         ]
 
 
+class Media(BaseModel):
+    document = peewee.ForeignKeyField(Document, related_name='media')
+    media_type = peewee.CharField(max_length=30)
+    url = peewee.CharField()
+
+    class Meta:
+        primary_key = peewee.CompositeKey('document', 'url')
+
+
 def initialize_database():
-    Document.create_table(fail_silently=True)
+    peewee.create_model_tables([Document, Media], fail_silently=True)
