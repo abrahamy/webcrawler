@@ -4,10 +4,11 @@ import os
 import datetime
 from tika import tika, parser
 from scrapy.exceptions import DropItem
+from scrapy.utils.project import get_project_settings
 from webcrawler.items import Item, Parsed
 from webcrawler.dal import Document
 
-
+tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
 tika.TikaClientOnly = True
 
 
@@ -21,11 +22,9 @@ class ContentParser(object):
             if type(item) is not Item:
                 spider.logger.warning(
                     'ContentParser expects item to be an instance of webcrawler.items.Item \
-                    got {} instead.'.format(
-                        '.'.join([item.__class__.__module__, item.__class__.__name__])
-                    )
-                )
-                
+                    got {} instead.'.format('.'.join(
+                        [item.__class__.__module__, item.__class__.__name__])))
+
                 return item
 
             parsed = parser.from_file(item['temp_filename'])
@@ -34,18 +33,16 @@ class ContentParser(object):
                 url=item['url'],
                 links=item['links'],
                 text=parsed.get('content', ''),
-                meta=parsed['metadata']
-            )
+                meta=parsed['metadata'])
 
         except:
-            spider.logger.warning(
-                'Failed to parse content of "{}"'.format(item['url'])
-            )
+            spider.logger.warning('Failed to parse content of "{}"'.format(
+                item['url']))
         finally:
             if isinstance(item, Item):
                 # delete the temporary file
                 os.remove(item['temp_filename'])
-        
+
         raise DropItem
 
 
@@ -59,13 +56,12 @@ class FTSIndexer(object):
             if type(item) is not Parsed:
                 spider.logger.warning(
                     'FTSIndexer expects item to be an instance of \
-                    webcrawler.items.Parsed got {} instead'.format(
-                        '.'.join([item.__class__.__module__, item.__class__.__name__])
-                    )
-                )
+                    webcrawler.items.Parsed got {} instead'
+                    .format('.'.join(
+                        [item.__class__.__module__, item.__class__.__name__])))
 
                 return None
-            
+
             doc_fields = Document.get_fields_from_tika_metadata(item['meta'])
             doc_fields['text'] = item['text']
             doc_fields['url'] = item['url']
@@ -78,5 +74,4 @@ class FTSIndexer(object):
 
         except:
             spider.logger.exception(
-                'Failed to index url and metadata for {}'.format(item['url'])
-            )
+                'Failed to index url and metadata for {}'.format(item['url']))

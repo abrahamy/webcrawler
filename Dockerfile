@@ -13,4 +13,10 @@ RUN pip install --no-cache-dir wheel && \
 WORKDIR /usr/src
 RUN python -m pip install --no-cache-dir ./webcrawler*.whl
 EXPOSE 6800
-CMD ["/bin/bash"]
+ENV MYSQL_DATABASE_NAME=${MYSQL_DATABASE_NAME} \
+    MYSQL_DATABASE_USER=${MYSQL_DATABASE_USER} \
+    MYSQL_DATABASE_PASSWORD=${MYSQL_DATABASE_PASSWORD} \
+    MYSQL_DATABASE_HOST=${MYSQL_DATABASE_HOST} \
+    MYSQL_DATABASE_PORT=${MYSQL_DATABASE_PORT} \
+    TIKA_SERVER_HOST=${TIKA_SERVER_HOST}
+CMD ["/usr/local/bin/crawl", "web"]
