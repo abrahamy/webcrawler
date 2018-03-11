@@ -7,27 +7,34 @@ from setuptools.command.install import install
 
 
 class CustomInstall(install):
-
     def _spawn(self, cmd):
         return subprocess.run(
-            cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stdout, shell=True
-        )
-    
+            cmd,
+            stdin=sys.stdin,
+            stdout=sys.stdout,
+            stderr=sys.stdout,
+            shell=True)
+
+    def enable_and_start_systemd_service(self, service):
+        self._spawn('systemctl daemon-reload')
+        self._spawn('systemctl enable {}.service'.format(service))
+        self._spawn('systemctl start {}.service'.format(service))
+
     def run(self):
         super().run()
 
         try:
             if sys.platform is not 'linux':
                 return
-            
+
             # check if systemd is running
             out = subprocess.run(
-                ['cat', '/proc/1/comm'], check=True, stdout=subprocess.PIPE
-            ).stdout.decode('utf-8')
-            
+                ['cat', '/proc/1/comm'], check=True,
+                stdout=subprocess.PIPE).stdout.decode('utf-8')
+
             if 'systemd' in out:
-                self._spawn('sudo systemctl daemon-reload')
-                self._spawn('sudo systemctl enable webcrawler.service')
+                for service in ['webcrawler', 'newscrawler']:
+                    self.enable_and_start_systemd_service(service)
         except Exception:
             pass
 
@@ -37,14 +44,22 @@ def read(filename):
 
 
 params = {
-    'name': 'webcrawler',
-    'version': '1.0.4',
-    'description': 'A web crawler bot',
-    'author': 'Abraham Aondowase Yusuf',
-    'author_email': 'aaondowasey@gmail.com',
-    'license': read('LICENSE'),
-    'url': 'https://bitbucket.org/abrahamy/webcrawler.git',
-    'packages': find_packages(exclude=["features/*"]),
+    'name':
+    'webcrawler',
+    'version':
+    '1.1.0',
+    'description':
+    'A web crawler bot',
+    'author':
+    'Abraham Aondowase Yusuf',
+    'author_email':
+    'aaondowasey@gmail.com',
+    'license':
+    read('LICENSE'),
+    'url':
+    'https://bitbucket.org/abrahamy/webcrawler.git',
+    'packages':
+    find_packages(exclude=["features/*"]),
     'package_dir': {
         'webcrawler': 'webcrawler',
         'webcrawler.spiders': 'webcrawler/spiders'
@@ -52,20 +67,22 @@ params = {
     'package_data': {
         'webcrawler': ['starturls.txt', '../LICENSE', '../config/*.service']
     },
-    'scripts': ['crawler'],
-    'data_files': [
-        ('/etc/', ['scrapy.cfg']),
-        ('/etc/systemd/system', ['config/webcrawler.service'])
-    ],
+    'scripts': ['crawl'],
+    'data_files':
+    [('/etc/', ['scrapy.cfg']),
+     ('/etc/systemd/system',
+      ['config/webcrawler.service', 'config/newscrawler.service'])],
     'install_requires': [
-        'peewee==2.9.1',
-        'PyMySQL==0.7.10',
-        'scrapy-fake-useragent==1.0.2',
-        'Scrapy==1.3.3',
-        'tika==1.14',
-        'python-dateutil==2.6.0',
+        'peewee==3.1.2',
+        'PyMySQL==0.8.0',
+        'scrapy-fake-useragent==1.1.0',
+        'Scrapy==1.5.0',
+        'tika==1.16',
+        'python-dateutil==2.6.1',
     ],
-    'cmdclass': {'install': CustomInstall}
+    'cmdclass': {
+        'install': CustomInstall
+    }
 }
 
 setup(**params)

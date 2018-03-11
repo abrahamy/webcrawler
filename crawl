@@ -1,0 +1,40 @@
+#!/usr/bin/python3
+import os
+
+os.environ.putenv('SCRAPY_SETTINGS_MODULE', 'webcrawler.settings')
+
+import argparse
+from twisted.internet import reactor
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.project import get_project_settings
+from scrapy.utils.log import configure_logging
+from webcrawler.spiders.cmsl import CmslSpider
+from webcrawler.spiders.news import NewsSpider
+from webcrawler.dal import Document
+
+Document.create_table(fail_silently=True)
+
+parser = argparse.ArgumentParser(description='Crawl the Web!')
+parser.add_argument(
+    'spider',
+    metavar='SPIDER',
+    choices=['news', 'web'],
+    help='the spider to use in the crawl.')
+
+
+def get_crawler_runner():
+    settings = get_project_settings()
+    configure_logging(settings)
+    return CrawlerRunner(settings)
+
+
+def start_crawl(spider):
+    crawler = get_crawler_runner()
+    deferred = crawler.crawl(CmslSpider if spider is 'web' else NewsSpider)
+    deferred.addBoth(lambda _: start_crawl())
+
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    start_crawl(args.spider)
+    reactor.run()

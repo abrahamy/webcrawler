@@ -1,10 +1,10 @@
 [Unit]
-Description=Webcrawler Service
+Description=NewsCrawler Service
 
 [Service]
 Type=simple
 Environment=SCRAPY_SETTINGS_MODULE=webcrawler.settings
-ExecStart=/usr/local/bin/crawl web
+ExecStart=/usr/local/bin/crawl news
 Restart=always
 
 [Install]
