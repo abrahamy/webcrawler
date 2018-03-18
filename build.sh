@@ -13,19 +13,12 @@ prepare_build() {
     sed -i '' s/$placeholder/$mysql_password/g docker-compose.yml
 }
 
-abort()
-{
-    echo "An error occurred. Exiting..." >&2
-}
-
-trap 'abort' 0
-
 set -x
 
 prepare_build
 
 echo "starting docker-compose build..."
 
-docker-compose build
+docker-compose --project-name '' build
 
 echo "ce fin!"
