@@ -99,5 +99,6 @@ docker-compose.yml
 
 # docker volumes
 mysql_data
+api_logs
 web_logs
 news_logs

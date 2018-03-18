@@ -14,4 +14,4 @@ WORKDIR /usr/src
 RUN python -m pip install --no-cache-dir ./webcrawler*.whl && \
     rm ./webcrawler*.whl
 EXPOSE 6800
-ENTRYPOINT [ "/usr/local/bin/crawl", "web"]
+ENTRYPOINT [ "./entrypoint.sh" "web"]

@@ -16,6 +16,8 @@ services:
       - "db:mysql"
     depends_on:
       - "db"
+    volumes:
+      - ./api_logs:/var/log/uWSGI
   # Database Container
   db:
     container_name: webcrawler_database
@@ -44,7 +46,7 @@ services:
       MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
-      - /usr/local/bin/crawl
+      - ./entrypoint.sh
       - web
     ports:
       - "6800:6800"
@@ -65,7 +67,7 @@ services:
       MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
-      - /usr/local/bin/crawl
+      - ./entrypoint.sh
       - news
     ports:
       - "6801:6800"
@@ -80,5 +82,6 @@ services:
 
 volumes:
   mysql_data:
+  api_logs:
   web_logs:
   news_logs:
