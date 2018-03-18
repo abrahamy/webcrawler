@@ -14,6 +14,8 @@ services:
       - "8888:80"
     links:
       - "db:mysql"
+    depends_on:
+      - "db"
   # Database Container
   db:
     container_name: webcrawler_database
@@ -49,6 +51,9 @@ services:
     links:
       - "db:mysql"
       - "tikaserver:tikaserver"
+    depends_on:
+      - "db"
+      - "tikaserver"
     volumes:
       - ./web_logs:/var/log
   # News Sites Crawler Container
@@ -67,6 +72,9 @@ services:
     links:
       - "db:mysql"
       - "tikaserver:tikaserver"
+    depends_on:
+      - "db"
+      - "tikaserver"
     volumes:
       - ./news_logs:/var/log
 
