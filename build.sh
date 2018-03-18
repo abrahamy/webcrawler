@@ -2,6 +2,10 @@
 
 prepare_build() {
     echo "preparing build..."
+    echo "creating docker-compose.yml from sample file..."
+
+    cp docker-compose.sample.yml docker-compose.yml
+    
     echo "generating mysql password..."
     
     local mysql_password=$(pwgen 24 1)

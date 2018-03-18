@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: api/Dockerfile
     environment:
-      MYSQL_DATABASE_PASSWORD: IDei6haenah6eiphuz1aiwoo # To be changed by build script
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
       MYSQL_DATABASE_HOST: db
     ports:
       - "80"
@@ -23,7 +23,7 @@ services:
     environment:
       MYSQL_DATABASE: webcrawler
       MYSQL_USER: webcrawler
-      MYSQL_PASSWORD: IDei6haenah6eiphuz1aiwoo # To be changed by build script
+      MYSQL_PASSWORD: some-random-gibberish # To be changed by build script
     ports:
       - "3306"
     volumes:
@@ -45,7 +45,7 @@ services:
     container_name: webcrawler
     build: .
     environment:
-      MYSQL_DATABASE_PASSWORD: IDei6haenah6eiphuz1aiwoo # To be changed by build script
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
       MYSQL_DATABASE_HOST: db
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
@@ -66,7 +66,7 @@ services:
     container_name: newscrawler
     build: .
     environment:
-      MYSQL_DATABASE_PASSWORD: IDei6haenah6eiphuz1aiwoo # To be changed by build script
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
       MYSQL_DATABASE_HOST: db
       TIKA_SERVER_HOST: tikaserver
     entrypoint:

@@ -61,10 +61,12 @@ params = {
     'packages':
     find_packages(exclude=["features/*"]),
     'package_dir': {
+        'api': 'api',
         'webcrawler': 'webcrawler',
         'webcrawler.spiders': 'webcrawler/spiders'
     },
     'package_data': {
+        'api': ['Dockerfile', 'entrypoint.sh', 'requirements.txt'],
         'webcrawler': ['starturls.txt', '../LICENSE', '../config/*.service']
     },
     'scripts': ['crawl'],
