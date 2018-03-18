@@ -10,7 +10,7 @@ prepare_build() {
     echo "mysql password generated! password is: $mysql_password"
     echo "replacing password placeholder with new password..."
 
-    sed -i s/$placeholder/$mysql_password/g docker-compose.yml
+    sed -i '' s/$placeholder/$mysql_password/g docker-compose.yml
 }
 
 abort()
