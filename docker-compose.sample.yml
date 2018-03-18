@@ -1,6 +1,7 @@
 version: '3.0'
 
 services:
+  # API Container
   api:
     container_name: webcrawler_api
     build:
@@ -8,15 +9,12 @@ services:
       dockerfile: api/Dockerfile
     environment:
       MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: db
+      MYSQL_DATABASE_HOST: mysql
     ports:
-      - "80"
+      - "8888:80"
     links:
-      - db:db
-    networks:
-      internal:
-        aliases:
-          - "api"
+      - "db:mysql"
+  # Database Container
   db:
     container_name: webcrawler_database
     image: mysql:5.7
@@ -28,25 +26,19 @@ services:
       - "3306"
     volumes:
       - ./mysql_data:/var/lib/mysql
-    networks:
-      internal:
-        aliases:
-          - "db"
+  # Tika Server Container
   tikaserver:
     container_name: tikaserver
     image: logicalspark/docker-tikaserver
     ports:
     - "9998"
-    networks:
-      internal:
-        aliases:
-          - "tikaserver"
+  # Default Web Crawler Container
   webcrawler:
     container_name: webcrawler
     build: .
     environment:
       MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: db
+      MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
       - /usr/local/bin/crawl
@@ -54,20 +46,17 @@ services:
     ports:
       - "6800:6800"
     links:
-      - db:db
-      - tikaserver:tikaserver
+      - "db:mysql"
+      - "tikaserver:tikaserver"
     volumes:
       - ./web_logs:/var/log
-    networks:
-      internal:
-        aliases:
-          - webcrawler
+  # News Sites Crawler Container
   newscrawler:
     container_name: newscrawler
     build: .
     environment:
       MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: db
+      MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
       - /usr/local/bin/crawl
@@ -75,19 +64,12 @@ services:
     ports:
       - "6801:6800"
     links:
-      - db:db
-      - tikaserver:tikaserver
+      - "db:mysql"
+      - "tikaserver:tikaserver"
     volumes:
       - ./news_logs:/var/log
-    networks:
-      internal:
-        aliases:
-          - newscrawler
 
 volumes:
   mysql_data:
   web_logs:
   news_logs:
-
-networks:
-  internal:

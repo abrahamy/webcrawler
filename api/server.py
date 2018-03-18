@@ -5,7 +5,7 @@ from webcrawler.dal import Document
 @hug.get
 @hug.post
 def search(query, page=1, items=20):
-    '''Search the database of crawled data''''
+    '''Search the database of crawled data'''
     return Document.fulltext_search(query, page_number=page, items_per_page=items)
 
 
