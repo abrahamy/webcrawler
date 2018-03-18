@@ -19,7 +19,7 @@ services:
     container_name: webcrawler_database
     image: mysql:5.7
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: webcrawler
       MYSQL_USER: webcrawler
       MYSQL_PASSWORD: some-random-gibberish # To be changed by build script
