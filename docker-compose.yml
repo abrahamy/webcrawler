@@ -1,0 +1,91 @@
+version: '3.0'
+
+services:
+  api:
+    container_name: webcrawler_api
+    build: api
+    environment:
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
+      MYSQL_DATABASE_HOST: db
+    ports:
+      - "80"
+    links:
+      - db:db
+    networks:
+      internal:
+        aliases:
+          - "api"
+  db:
+    container_name: webcrawler_database
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: webcrawler
+      MYSQL_USER: webcrawler
+      MYSQL_PASSWORD: some-random-gibberish # To be changed by build script
+    ports:
+      - "3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      internal:
+        aliases:
+          - "db"
+  tikaserver:
+    container_name: tikaserver
+    image: logicalspark/docker-tikaserver
+    ports:
+    - "9998"
+    networks:
+      internal:
+        aliases:
+          - "tikaserver"
+  webcrawler:
+    container_name: webcrawler
+    build: .
+    environment:
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
+      MYSQL_DATABASE_HOST: db
+      TIKA_SERVER_HOST: tikaserver
+    entrypoint:
+      - /usr/local/bin/crawl
+      - web
+    ports:
+      - "6800:6800"
+    links:
+      - db:db
+      - tikaserver:tikaserver
+    volumes:
+      - ./web_logs:/var/log
+    networks:
+      internal:
+        aliases:
+          - webcrawler
+  newscrawler:
+    container_name: newscrawler
+    build: .
+    environment:
+      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
+      MYSQL_DATABASE_HOST: db
+      TIKA_SERVER_HOST: tikaserver
+    entrypoint:
+      - /usr/local/bin/crawl
+      - news
+    ports:
+      - "6801:6800"
+    links:
+      - db:db
+      - tikaserver:tikaserver
+    volumes:
+      - ./news_logs:/var/log
+    networks:
+      internal:
+        aliases:
+          - newscrawler
+
+volumes:
+  mysql_data:
+  web_logs:
+  news_logs:
+
+networks:
+  internal:
