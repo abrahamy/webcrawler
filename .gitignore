@@ -93,4 +93,11 @@ tika-server-1.14.jar
 tika
 logs/
 .vscode/
+
+# docker
 docker-compose.yml
+
+# docker volumes
+mysql_data
+web_logs
+news_logs
