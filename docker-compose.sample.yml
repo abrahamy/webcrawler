@@ -17,7 +17,7 @@ services:
     depends_on:
       - "db"
     volumes:
-      - ./api_logs:/var/log/uWSGI
+      - ./api_logs:/usr/src/api/logs
   # Database Container
   db:
     container_name: webcrawler_database
