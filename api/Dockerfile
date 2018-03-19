@@ -10,4 +10,7 @@ WORKDIR /usr/src/api
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
-ENTRYPOINT [ "./entrypoint.sh", "web" ]
+ENTRYPOINT [ "/usr/local/bin/uwsgi", "--http", "0.0.0.0:80", "--uid", "uwsgi", \
+    "--plugins", "python3", "--protocol", "uwsgi", \
+    "--logto", "logs/uWSGI.log", \
+    "--wsgi", "server:__hug_wsgi__" ]

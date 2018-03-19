@@ -46,7 +46,7 @@ services:
       MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
-      - "./entrypoint.sh"
+      - "/bin/sleep 30 && /usr/local/bin/crawl"
       - web
     ports:
       - "6800:6800"
@@ -67,7 +67,7 @@ services:
       MYSQL_DATABASE_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
     entrypoint:
-      - "./entrypoint.sh"
+      - "/bin/sleep 30 && /usr/local/bin/crawl"
       - news
     ports:
       - "6801:6800"
