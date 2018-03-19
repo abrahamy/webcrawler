@@ -28,9 +28,12 @@ def get_crawler_runner():
     return CrawlerRunner(settings)
 
 
+runner = get_crawler_runner()
+
+
 def start_crawl(spider):
-    crawler = get_crawler_runner()
-    deferred = crawler.crawl(CmslSpider if spider is 'web' else NewsSpider)
+    global runner
+    deferred = runner.crawl(CmslSpider if spider is 'web' else NewsSpider)
     deferred.addBoth(lambda _: start_crawl(spider))
 
 
