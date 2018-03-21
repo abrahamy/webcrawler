@@ -3,4 +3,4 @@ from scrapy.spiders import CrawlSpider
 
 
 class NewsSpider(CrawlSpider):
-    pass
+    name = 'cmsl_news'

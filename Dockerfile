@@ -6,12 +6,9 @@ LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
 
 COPY . /usr/src/webcrawler
 WORKDIR /usr/src/webcrawler
-RUN pip install --no-cache-dir --upgrade pip wheel && \
+RUN pip install --no-cache-dir wheel && \
     python setup.py bdist_wheel && \
-    cp dist/webcrawler*.whl ../ && \
+    pip install --no-cache-dir dist/webcrawler*.whl && \
     cd .. && rm -rf webcrawler/
-WORKDIR /usr/src
-RUN python -m pip install --no-cache-dir ./webcrawler*.whl && \
-    rm ./webcrawler*.whl
 EXPOSE 6800
 ENTRYPOINT [ "./entrypoint.sh" "web"]

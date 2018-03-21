@@ -24,7 +24,7 @@ def get_start_urls():
 
 
 class CmslSpider(CrawlSpider):
-    name = 'cmsl'
+    name = 'cmsl_web'
     start_urls = get_start_urls()
     rules = (
         Rule(link_extractor, callback='parse_item', follow=True),
@@ -43,14 +43,14 @@ class CmslSpider(CrawlSpider):
             with tempfile.NamedTemporaryFile(delete=False) as stream:
                 stream.write(response.body)
                 fields['temp_filename'] = stream.name
-            
+
             return Item(**fields)
 
         except OSError:
             self.logger.error(
                 'Failed to save response.body to temporary file', exec_info=True
             )
-    
+
     @staticmethod
     def extract_external_links(response):
         '''
@@ -58,11 +58,12 @@ class CmslSpider(CrawlSpider):
         '''
         if not isinstance(response, scrapy.http.HtmlResponse):
             return []
-        
+
         parsed_url = urlparse(response.url)
         domain = (parsed_url.netloc,)
 
         link_extractor = LinkExtractor(deny_domains=domain)
-        links = map(lambda link: link.url, link_extractor.extract_links(response))
+        links = map(lambda link: link.url,
+                    link_extractor.extract_links(response))
 
         return set(links)
