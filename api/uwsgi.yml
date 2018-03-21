@@ -1,0 +1,9 @@
+uwsgi:
+    uid: api
+    chdir: /home/api
+    socket: 0.0.0.0:6000
+    processes: 4
+    threads: 2
+    master: 1
+    module: "server:__hug_wsgi__"
+    logto: logs/uWSGI.log

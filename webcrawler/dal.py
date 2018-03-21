@@ -40,15 +40,15 @@ class SetField(peewee.TextField):
     def db_value(self, value):
         if value is None:
             return
-        
+
         if not isinstance(value, (list, tuple, set)):
             raise ValueError('Value must be a list, tuple or set of strings')
-        
+
         value = map(lambda i: str(i), set(value))
         value_str = ';'.join(value)
 
         return super().db_value(value_str)
-    
+
     def python_value(self, value):
         value = super().python_value(value)
 
@@ -83,7 +83,7 @@ class Document(peewee.Model):
             instance = super().create(**query)
         except peewee.IntegrityError as e:
             cls._meta.database.rollback()
-            instance = cls.select().where(cls.url==query.pop('url')).get()
+            instance = cls.select().where(cls.url == query.pop('url')).get()
             instance.update(**query)
 
         return instance
@@ -120,14 +120,14 @@ class Document(peewee.Model):
         of matching records in JSON format or as model instances
         '''
         query = (Document
-                    .select()
-                    .where(SQL(
+                 .select()
+                 .where(SQL(
                         '''
                         MATCH (
                             `text`, subject, title, description, creator, publisher
                         ) AGAINST (%s IN NATURAL LANGUAGE MODE)
                         ''', term
-                    )).paginate(page_number, items_per_page))
+                        )).paginate(page_number, items_per_page))
 
         if return_json:
             return Document.to_json(query)
@@ -159,7 +159,7 @@ class Document(peewee.Model):
             object_list.append(model_dict)
 
         return json.dumps(object_list)
-    
+
     class Meta:
         database = get_db()
         constraints = [
@@ -169,3 +169,6 @@ class Document(peewee.Model):
 
 def initialize_database():
     Document.create_table(fail_silently=True)
+
+
+initialize_database()

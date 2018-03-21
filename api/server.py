@@ -1,11 +1,18 @@
 import hug
-from webcrawler.dal import Document
+try:
+    # Wrapped in a try-catch because when using docker-compose the database container
+    # may not be ready when this import is executed
+    from webcrawler.dal import Document
+except Exception as _:
+    Document = None
 
 
 @hug.get
 @hug.post
 def search(query, page=1, items=20):
     '''Search the database of crawled data'''
+    if not Document:
+        from webcrawler.dal import Document
     return Document.fulltext_search(query, page_number=page, items_per_page=items)
 
 

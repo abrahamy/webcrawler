@@ -10,9 +10,6 @@ RUN pip install --no-cache-dir -r /usr/src/api/requirements.txt && \
 USER api
 COPY ./api /home/api
 COPY ./webcrawler /home/api/webcrawler
-EXPOSE 80
+EXPOSE 6000
 WORKDIR /home/api
-ENTRYPOINT [ "/usr/local/bin/uwsgi", "--http", "0.0.0.0:80", "--uid", "api", \
-    "--plugins", "python3", "--protocol", "uwsgi", \
-    "--logto", "logs/uWSGI.log", \
-    "--wsgi", "server:__hug_wsgi__" ]
+ENTRYPOINT [ "/usr/local/bin/uwsgi", "--yaml", "uwsgi.yml" ]

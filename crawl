@@ -10,9 +10,7 @@ from scrapy.utils.project import get_project_settings
 from scrapy.utils.log import configure_logging
 from webcrawler.spiders.cmsl import CmslSpider
 from webcrawler.spiders.news import NewsSpider
-from webcrawler.dal import Document
 
-Document.create_table(fail_silently=True)
 
 parser = argparse.ArgumentParser(description='Crawl the Web!')
 parser.add_argument(
