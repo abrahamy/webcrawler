@@ -11,6 +11,8 @@
 
 import os
 
+BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
 
 def read_start_urls():
     filename = os.path.join(os.path.dirname(__file__), 'starturls.txt')
@@ -31,6 +33,18 @@ def read_start_urls():
     return urls
 
 
+def create_log_dir():
+    '''Creates the logs directory if it does not exists'''
+    log_dir = os.getenv('SCRAPY_LOG_PATH', os.path.join(BASEDIR, 'logs'))
+    if not os.path.exists(log_dir) or os.path.isfile(log_dir):
+        try:
+            os.mkdir(log_dir)
+        except OSError as _:
+            pass
+
+    return log_dir
+
+
 BOT_NAME = 'CMSL Bot'
 
 SPIDER_MODULES = ['webcrawler.spiders']
@@ -49,7 +63,7 @@ CONCURRENT_REQUESTS = 200
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 0.25
-DOWNLOAD_TIMEOUT = 300  #prod=15
+DOWNLOAD_TIMEOUT = 300  # prod=15
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 8
 # CONCURRENT_REQUESTS_PER_IP = 0
@@ -61,14 +75,14 @@ COOKIES_ENABLED = False
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
+# DEFAULT_REQUEST_HEADERS = {
 #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 #   'Accept-Language': 'en',
 #}
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
+# SPIDER_MIDDLEWARES = {
 #    'webcrawler.middlewares.MyCustomSpiderMiddleware': 543,
 #}
 
@@ -81,7 +95,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
+# EXTENSIONS = {
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
@@ -108,7 +122,8 @@ ITEM_PIPELINES = {
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60  # prod=24 * 60 * 60 # cache for 24 hours
+# prod=24 * 60 * 60 # cache for 24 hours
+HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60
 HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
@@ -117,11 +132,11 @@ HTTPCACHE_POLICY = 'scrapy.extensions.httpcache.RFC2616Policy'
 
 # Database connection settings
 CMSL_BOT_DATABASE = {
-    'name': os.getenv('MYSQL_DATABASE_NAME', 'webcrawler'),
-    'user': os.getenv('MYSQL_DATABASE_USER', 'webcrawler'),
-    'password': os.getenv('MYSQL_DATABASE_PASSWORD', 'secret'),
-    'host': os.getenv('MYSQL_DATABASE_HOST', 'localhost'),
-    'port': os.getenv('MYSQL_DATABASE_POST', 3306)
+    'name': os.getenv('DB_NAME', 'webcrawler'),
+    'user': os.getenv('DB_USER', 'webcrawler'),
+    'password': os.getenv('DB_PASSWORD', 'secret'),
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': os.getenv('DB_PORT', 3306)
 }
 
 TIKA_SERVER_HOST = os.getenv('TIKA_SERVER_HOST', 'localhost')
@@ -131,7 +146,7 @@ DEFAULT_START_URLS = read_start_urls()
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'ERROR'
-LOG_FILE = '/var/log/crawler.log'
+LOG_FILE = os.path.join(create_log_dir(), 'scrapy.log')
 RETRY_ENABLED = False
 REDIRECT_ENABLED = True  # prod=False
 AJAXCRAWL_ENABLED = True

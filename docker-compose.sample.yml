@@ -1,9 +1,9 @@
-version: '3.0'
+version: '3.1'
 
 services:
   # API Container
   api:
-    container_name: webcrawler_api
+    container_name: api
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -20,8 +20,9 @@ services:
       - ./api_logs:/usr/src/api/logs
   # Database Container
   db:
-    container_name: webcrawler_database
-    image: mysql:5.7
+    container_name: db
+    image: mariadb
+    restart: always
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: webcrawler
@@ -30,7 +31,7 @@ services:
     ports:
       - "3306"
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - ./mariadb_data:/var/lib/mysql
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
@@ -38,15 +39,16 @@ services:
     ports:
     - "9998"
   # Default Web Crawler Container
-  webcrawler:
-    container_name: webcrawler
+  web:
+    container_name: web
     build: .
     environment:
-      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: mysql
+      DB_PASSWORD: some-random-gibberish # To be changed by build script
+      DB_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
+      SCRAPY_LOG_PATH: "/logs"
     entrypoint:
-      - "/bin/sleep 30 && /usr/local/bin/crawl"
+      - "/usr/local/bin/crawl"
       - web
     ports:
       - "6800:6800"
@@ -57,15 +59,16 @@ services:
       - "db"
       - "tikaserver"
     volumes:
-      - ./web_logs:/var/log
+      - ./web_logs:/logs
   # News Sites Crawler Container
-  newscrawler:
-    container_name: newscrawler
+  news:
+    container_name: news
     build: .
     environment:
-      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: mysql
+      DB_PASSWORD: some-random-gibberish # To be changed by build script
+      DB_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
+      SCRAPY_LOG_PATH: "/logs"
     entrypoint:
       - "/bin/sleep 30 && /usr/local/bin/crawl"
       - news
@@ -78,10 +81,10 @@ services:
       - "db"
       - "tikaserver"
     volumes:
-      - ./news_logs:/var/log
+      - ./news_logs:/logs
 
 volumes:
-  mysql_data:
+  mariadb_data:
   api_logs:
   web_logs:
   news_logs:

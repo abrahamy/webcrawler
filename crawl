@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 import os
 
 os.environ.putenv('SCRAPY_SETTINGS_MODULE', 'webcrawler.settings')
