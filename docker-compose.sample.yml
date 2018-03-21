@@ -17,7 +17,7 @@ services:
     depends_on:
       - "db"
     volumes:
-      - ./api_logs:/usr/src/api/logs
+      - ./api_logs:/home/api/logs
   # Database Container
   db:
     container_name: db
