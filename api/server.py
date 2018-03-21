@@ -12,7 +12,7 @@ api = hug.API(__name__)
 
 @hug.get('/search', api=api)
 @hug.post('/search', api=api)
-def search(query, page=1, items=20):
+def search(query, page: hug.types.number = 1, items: hug.types.number = 20):
     '''Search the database of crawled data'''
     if not Document:
         from webcrawler.dal import Document
