@@ -26,3 +26,6 @@ def update_news_urls(urls):
 def update_news_crawler_settings(settings):
     '''Update the settings for the news crawler'''
     pass
+
+
+application = hug.API(__name__).http.server()

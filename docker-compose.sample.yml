@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
       MYSQL_DATABASE_HOST: mysql
     ports:
-      - "8888:80"
+      - "6000:6000"
     links:
       - "db:mysql"
     depends_on:

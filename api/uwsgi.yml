@@ -5,5 +5,5 @@ uwsgi:
     processes: 4
     threads: 2
     master: 1
-    module: "server:__hug_wsgi__"
+    wsgi-file: server.py
     logto: logs/uWSGI.log
