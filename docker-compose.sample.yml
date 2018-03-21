@@ -70,7 +70,7 @@ services:
       TIKA_SERVER_HOST: tikaserver
       SCRAPY_LOG_PATH: "/logs"
     entrypoint:
-      - "/bin/sleep 30 && /usr/local/bin/crawl"
+      - "/usr/local/bin/crawl"
       - news
     ports:
       - "6801:6800"
