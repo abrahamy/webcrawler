@@ -14,6 +14,7 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
     rules = (
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
+    custom_settings = {}
 
     @property
     def start_urls(self):
