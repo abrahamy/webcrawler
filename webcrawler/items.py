@@ -9,7 +9,12 @@ class Item(scrapy.Item):
     '''
     url = scrapy.Field()
     temp_filename = scrapy.Field()
-    links = scrapy.Field()
+    files = scrapy.Field()              # required by scrapy.pipelines.FilesPipeline
+    images = scrapy.Field()             # required by scrapy.pipelines.ImagesPipeline
+    file_urls = scrapy.Field()          # required by scrapy.pipelines.FilesPipeline
+    image_urls = scrapy.Field()         # required by scrapy.pipelines.ImagesPipeline
+    external_urls = scrapy.Field()      # renamed from `links` to `external_urls`
+    media_links = scrapy.Field()
 
 
 class Parsed(scrapy.Item):

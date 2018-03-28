@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-from scrapy.spiders import CrawlSpider
+from .web import WebSpider
 
 
-class NewsSpider(CrawlSpider):
-    name = 'cmsl_news'
+class NewsSpider(WebSpider):
+    name = 'newspider'
+
+    @property
+    def start_urls(self):
+        '''Get start urls from the database'''
+        raise Exception('Not Implemented')
