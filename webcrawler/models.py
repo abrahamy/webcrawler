@@ -1,5 +1,6 @@
 # Data Access Layer
 import json
+import datetime
 import peewee
 from peewee import SQL
 from playhouse.pool import PooledMySQLDatabase
@@ -30,6 +31,9 @@ def get_db():
         db_settings.pop('name'),
         **db_settings
     )
+
+
+DB = get_db()
 
 
 class SetField(peewee.TextField):
@@ -64,6 +68,8 @@ class NewsConfig(peewee.Model):
     # Re-index news URLs after `restart_interval` hours
     restart_interval = peewee.FloatField(default=2.0)
     news_urls = SetField()
+    created = peewee.DateTimeField(default=datetime.datetime.now)
+    modified = peewee.DateTimeField()
 
     @classmethod
     def create_or_update_news_config(cls, news_urls, restart_interval=2.0, append_urls=False):
@@ -82,7 +88,26 @@ class NewsConfig(peewee.Model):
             instance.news_urls = news_urls
 
         instance.restart_interval = restart_interval
+        instance.modified = datetime.datetime.now()
         return instance.save()
+
+    @classmethod
+    def create_default_instance(cls):
+        '''
+        Creates a default instance of the NewsConfig model
+        '''
+        data = {
+            'news_urls': set([
+                'https://www.vanguardngr.com/',
+                'http://punchng.com/',
+                'https://www.dailytrust.com.ng/',
+            ]),
+            'modified': datetime.datetime.now()
+        }
+        cls.create(**data)
+
+    class Meta:
+        database = DB
 
 
 class Document(peewee.Model):
@@ -191,14 +216,16 @@ class Document(peewee.Model):
         return json.dumps(object_list)
 
     class Meta:
-        database = get_db()
+        database = DB
         constraints = [
             SQL("FULLTEXT(`text`, subject, title, description, creator, publisher)")
         ]
 
 
 def initialize_database():
-    Document.create_table(fail_silently=True)
+    NewsConfig.create_table(safe=True)
+    NewsConfig.create_default_instance()
+    Document.create_table(safe=True)
 
 
 initialize_database()
