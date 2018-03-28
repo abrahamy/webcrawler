@@ -6,7 +6,7 @@ from tika import tika, parser
 from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
 from webcrawler.items import Item, Parsed
-from webcrawler.dal import Document
+from webcrawler.models import Document
 
 tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
 tika.TikaClientOnly = True

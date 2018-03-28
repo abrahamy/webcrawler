@@ -4,6 +4,7 @@ from .web import WebSpider
 
 class NewsSpider(WebSpider):
     name = 'newspider'
+    custom_settings = {}
 
     @property
     def start_urls(self):

@@ -1,4 +1,5 @@
 # Data Access Layer
+import json
 import peewee
 from peewee import SQL
 from playhouse.pool import PooledMySQLDatabase
@@ -81,7 +82,7 @@ class Document(peewee.Model):
         '''
         try:
             instance = super().create(**query)
-        except peewee.IntegrityError as e:
+        except peewee.IntegrityError as _:
             cls._meta.database.rollback()
             instance = cls.select().where(cls.url == query.pop('url')).get()
             instance.update(**query)
