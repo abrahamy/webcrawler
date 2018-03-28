@@ -56,6 +56,35 @@ class SetField(peewee.TextField):
         return set(value.split(';'))
 
 
+class NewsConfig(peewee.Model):
+    '''
+    NewsConfig model is used by the `webcrawler.spiders.news.NewsSpider` to dynamically
+    configure the crawler
+    '''
+    # Re-index news URLs after `restart_interval` hours
+    restart_interval = peewee.FloatField(default=2.0)
+    news_urls = SetField()
+
+    @classmethod
+    def create_or_update_news_config(cls, news_urls, restart_interval=2.0, append_urls=False):
+        '''
+        Ensures that only one instance of the news config exists
+
+        Use only this method for saving news configs
+        '''
+        instance = None
+        try:
+            instance = cls.select().get()
+            instance.news_urls = (instance.news_urls +
+                                  news_urls) if append_urls else news_urls
+        except peewee.DoesNotExist as _:
+            instance = cls()
+            instance.news_urls = news_urls
+
+        instance.restart_interval = restart_interval
+        return instance.save()
+
+
 class Document(peewee.Model):
     url = peewee.CharField(unique=True)
     crawl_date = peewee.DateTimeField()

@@ -9,3 +9,4 @@ Scrapy==1.5.0
 scrapy-fake-useragent==1.1.0
 tika==1.16
 yapf==0.20.2
+validators==0.12.1
