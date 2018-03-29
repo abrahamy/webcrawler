@@ -2,6 +2,7 @@ import hug
 import validators
 from hug.types import comma_separated_list, DelimitedList
 from webcrawler.models import Document, NewsConfig
+from .tasks import register_project, restart_spider
 
 
 api = hug.API(__name__)
@@ -100,8 +101,10 @@ def update_news_crawler_settings(
         )
         raise hug.exceptions.InvalidTypeData(error_msg)
 
-    NewsConfig.create_or_update_news_config(
-        news_urls, restart_interval=restart_interval, append_urls=append_urls)  # @todo: trigger NewsSpider restart
+    updated_config = NewsConfig.create_or_update_news_config(
+        news_urls, restart_interval=restart_interval, append_urls=append_urls)
+
+    restart_spider.delay(updated_config)
 
     reply = {
         'status': 'News crawler settings successfully updated!'
@@ -113,4 +116,5 @@ def update_news_crawler_settings(
     return reply
 
 
+register_project.delay()
 application = api.http.server()
