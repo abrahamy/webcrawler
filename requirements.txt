@@ -1,5 +1,4 @@
 fake-useragent==0.1.10
-flake8==3.5.0
 peewee==3.1.2
 PyMySQL==0.8.0
 pytest==3.4.2
@@ -7,5 +6,4 @@ python-dateutil==2.6.1
 Scrapy==1.5.0
 scrapy-fake-useragent==1.1.0
 tika==1.16
-yapf==0.20.2
 validators==0.12.1
