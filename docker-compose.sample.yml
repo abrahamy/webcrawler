@@ -28,10 +28,10 @@ services:
     image: rabbitmq
     restart: always
     environment:
-      - HOSTNAME: rabbitmq-broker
-      - RABBITMQ_DEFAULT_USER: webcrawler
-      - RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      - RABBITMQ_HIPE_COMPILE: 1
+      HOSTNAME: rabbitmq-broker
+      RABBITMQ_DEFAULT_USER: webcrawler
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_HIPE_COMPILE: 1
   # Default Web Crawler Container
   scrapyd:
     container_name: scrapyd
