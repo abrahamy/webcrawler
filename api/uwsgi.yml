@@ -1,7 +1,7 @@
 uwsgi:
     uid: api
     chdir: /home/api
-    http: 0.0.0.0:6000
+    http: 0.0.0.0:5000
     processes: 4
     threads: 2
     master: 1

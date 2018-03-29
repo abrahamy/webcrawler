@@ -28,7 +28,7 @@ services:
     image: rabbitmq
     restart: always
     environment:
-      HOSTNAME: rabbitmq-broker
+      HOSTNAME: ${RABBITMQ_HOST}
       RABBITMQ_DEFAULT_USER: webcrawler
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_HIPE_COMPILE: 1
@@ -57,14 +57,14 @@ services:
     environment:
       MYSQL_DATABASE_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE_HOST: mysql
-      RABBITMQ_HOST: rabbitmq-broker
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USER: webcrawler
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     ports:
-      - "6000"
+      - "5000"
     links:
       - "database:mysql"
-      - "rabbitmq:rabbitmq-broker"
+      - "rabbitmq:${RABBITMQ_HOST}"
     volumes:
       - "./api_logs:/home/api/logs"
 
