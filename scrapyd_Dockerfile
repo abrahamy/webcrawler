@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir scrapyd && \
 EXPOSE 6800
 USER scrapyd
 WORKDIR /home/scrapyd
-ENTRYPOINT [ "./usr/local/bin/scrapyd" "--uid=scrapyd" "--nodaemon" "--syslog" ]
+ENTRYPOINT [ "scrapyd", "--uid=scrapyd", "--nodaemon", "--syslog" ]

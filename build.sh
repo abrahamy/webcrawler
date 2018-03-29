@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -x
 
 export RABBITMQ_HOST=rabbitmq-broker
