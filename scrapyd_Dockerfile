@@ -1,0 +1,12 @@
+# Containerize App
+FROM python:stretch
+
+LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
+    Client="Cubic Multi Services Limited"
+
+RUN pip install --no-cache-dir scrapyd && \
+    useradd -ms /bin/bash scrapyd
+EXPOSE 6800
+USER scrapyd
+WORKDIR /home/scrapyd
+ENTRYPOINT [ "./usr/local/bin/scrapyd" "--uid=scrapyd" "--nodaemon" "--syslog" ]

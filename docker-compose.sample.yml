@@ -1,25 +1,8 @@
 version: '3.1'
 
 services:
-  # API Container
-  api:
-    container_name: api
-    build:
-      context: .
-      dockerfile: api/Dockerfile
-    environment:
-      MYSQL_DATABASE_PASSWORD: some-random-gibberish # To be changed by build script
-      MYSQL_DATABASE_HOST: mysql
-    ports:
-      - "6000:6000"
-    links:
-      - "db:mysql"
-    depends_on:
-      - "db"
-    volumes:
-      - ./api_logs:/home/api/logs
   # Database Container
-  db:
+  database:
     container_name: db
     image: mariadb
     restart: always
@@ -27,64 +10,64 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: webcrawler
       MYSQL_USER: webcrawler
-      MYSQL_PASSWORD: some-random-gibberish # To be changed by build script
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306"
     volumes:
-      - ./mariadb_data:/var/lib/mysql
+      - "./mariadb_data:/var/lib/mysql"
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
     image: logicalspark/docker-tikaserver
+    restart: always
     ports:
-    - "9998"
+      - "9998"
+  # RabbitMQ Broker for Celery (@see celeryproject.org)
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq
+    restart: always
+    environment:
+      - HOSTNAME: rabbitmq-broker
+      - RABBITMQ_DEFAULT_USER: webcrawler
+      - RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      - RABBITMQ_HIPE_COMPILE: 1
   # Default Web Crawler Container
-  web:
-    container_name: web
-    build: .
+  scrapyd:
+    container_name: scrapyd
+    build:
+      context: scrapyd
+    restart: always
     environment:
-      DB_PASSWORD: some-random-gibberish # To be changed by build script
+      DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: mysql
       TIKA_SERVER_HOST: tikaserver
-      SCRAPY_LOG_PATH: "/logs"
-    entrypoint:
-      - "/usr/local/bin/crawl"
-      - web
     ports:
-      - "6800:6800"
+      - "6800"
     links:
-      - "db:mysql"
+      - "database:mysql"
       - "tikaserver:tikaserver"
-    depends_on:
-      - "db"
-      - "tikaserver"
-    volumes:
-      - ./web_logs:/logs
-  # News Sites Crawler Container
-  news:
-    container_name: news
-    build: .
+  # API Container
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: always
     environment:
-      DB_PASSWORD: some-random-gibberish # To be changed by build script
-      DB_HOST: mysql
-      TIKA_SERVER_HOST: tikaserver
-      SCRAPY_LOG_PATH: "/logs"
-    entrypoint:
-      - "/usr/local/bin/crawl"
-      - news
+      MYSQL_DATABASE_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE_HOST: mysql
+      RABBITMQ_HOST: rabbitmq-broker
+      RABBITMQ_USER: webcrawler
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     ports:
-      - "6801:6800"
+      - "6000"
     links:
-      - "db:mysql"
-      - "tikaserver:tikaserver"
-    depends_on:
-      - "db"
-      - "tikaserver"
+      - "database:mysql"
+      - "rabbitmq:rabbitmq-broker"
     volumes:
-      - ./news_logs:/logs
+      - "./api_logs:/home/api/logs"
 
 volumes:
   mariadb_data:
   api_logs:
-  web_logs:
-  news_logs:
