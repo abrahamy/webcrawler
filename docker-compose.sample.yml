@@ -64,7 +64,7 @@ services:
       - scrapyd
     volumes:
       - ./api_logs:/home/api/logs
-    command: "celery -A tasks worker --loglevel=info"
+    command: "celery -A tasks worker --loglevel=info --pidfile=/home/api/celery.pid --logfile=/home/api/logs/celery.log"
 
 volumes:
   mariadb_data:
