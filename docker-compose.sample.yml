@@ -54,8 +54,8 @@ services:
       dockerfile: api/Dockerfile
     restart: always
     environment:
-      MYSQL_DATABASE_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE_HOST: mariadb
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_HOST: mariadb
     ports:
       - "5000"
     links:

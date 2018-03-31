@@ -194,6 +194,9 @@ class Document(peewee.Model):
         '''
         Return the list of models in the query as a JSON array given a SelectQuery
         '''
+        if not query:
+            return json.dumps([])
+
         if type(query) is not peewee.SelectQuery:
             raise ValueError
 

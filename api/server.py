@@ -2,7 +2,7 @@ import hug
 import validators
 from hug.types import comma_separated_list, DelimitedList
 from webcrawler.models import Document, NewsConfig
-from .tasks import register_project, restart_spider
+from tasks import register_project, restart_spider
 
 
 api = hug.API(__name__)
