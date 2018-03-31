@@ -18,7 +18,7 @@ clean_build() {
 }
 
 build_containers() {
-    local new_password="$(pwgen 36 1)"
+    local new_password="$(pwgen 24 1)"
     local placeholder="MySuperSecretPassword"
 
     mkdir scrapyd
