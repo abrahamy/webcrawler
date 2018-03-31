@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -x
 
-export MYSQL_PASSWORD=$(pwgen 24 1)
-
 clean_build() {
     '''Cleanup old build artefacts'''
     local unneeded=(api_logs mariadb_data redis_data scrapyd)
@@ -19,11 +17,18 @@ clean_build() {
     fi
 }
 
+build_containers() {
+    local new_password="$(pwgen 36 1)"
+    local placeholder="MySuperSecretPassword"
+
+    mkdir scrapyd
+    cp scrapyd_Dockerfile scrapyd/Dockerfile
+
+    sed s/$placeholder/$new_password/g <docker-compose.sample.yml >docker-compose.yml
+    
+    docker-compose --project-name '' build
+}
+
 clean_build
+build_containers
 
-mkdir scrapyd
-cp scrapyd_Dockerfile scrapyd/Dockerfile
-
-cp docker-compose.sample.yml docker-compose.yml
-
-docker-compose --project-name '' build

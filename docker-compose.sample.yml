@@ -10,7 +10,7 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: webcrawler
       MYSQL_USER: webcrawler
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PASSWORD: MySuperSecretPassword
     ports:
       - "3306"
     volumes:
@@ -38,7 +38,7 @@ services:
       context: scrapyd
     restart: always
     environment:
-      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_PASSWORD: MySuperSecretPassword
       DB_HOST: mariadb
       TIKA_SERVER_HOST: tikaserver
     ports:
@@ -54,7 +54,7 @@ services:
       dockerfile: api/Dockerfile
     restart: always
     environment:
-      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_PASSWORD: MySuperSecretPassword
       DB_HOST: mariadb
       # EGG_VERSION should match the version number in setup.py otherwise egg file resolution will fail in api.tasks
       EGG_VERSION: "2.0.0"

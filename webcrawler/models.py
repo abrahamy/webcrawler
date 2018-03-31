@@ -1,6 +1,7 @@
 # Data Access Layer
 import json
 import uuid
+import logging
 import datetime
 import peewee
 from peewee import SQL
@@ -8,6 +9,8 @@ from playhouse.pool import PooledMySQLDatabase
 from dateutil.parser import parse as parse_date
 from .settings import CMSL_BOT_DATABASE as db_settings
 
+
+logger = logging.getLogger(__name__)
 
 DOC_FIELD_TO_TIKA_META = {
     'content_type': ['Content-Type', 'Content-Type-Hint'],
@@ -197,11 +200,13 @@ class Document(peewee.Model):
         '''
         Return the list of models in the query as a JSON array given a SelectQuery
         '''
-        if not query:
-            return json.dumps([])
-
-        if type(query) is not peewee.SelectQuery:
-            raise ValueError
+        if not isinstance(query, peewee.SelectQuery):
+            error_message = (
+                '`Document.to_json` received an invalid argument `query`. '
+                'Got `{querytype}` instead of `peewee.SelectQuery`.'
+            ).format(querytype=type(query))
+            logger.error(error_message)
+            raise ValueError(error_message)
 
         object_list = []
         for model in query:

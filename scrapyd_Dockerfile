@@ -1,5 +1,5 @@
 # Containerize App
-FROM python:stretch
+FROM python:3.6
 
 LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
     Client="Cubic Multi Services Limited"
