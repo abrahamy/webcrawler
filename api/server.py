@@ -2,7 +2,7 @@ import hug
 import validators
 from hug.types import comma_separated_list, DelimitedList
 from webcrawler.models import Document, NewsConfig
-from tasks import register_project, restart_spider
+import tasks
 
 
 api = hug.API(__name__)
@@ -45,7 +45,7 @@ def search(query: hug.types.text, page: hug.types.number = 1, items: hug.types.n
 def _validate_urls(urls):
     '''
     Takes a list of strings representing urls and validates them
-    @see hug.types.DelimitedList
+    @see hug.types.comma_separated_list
 
     Returns:
         (set(valid_urls), set(invalid_urls))
@@ -56,21 +56,16 @@ def _validate_urls(urls):
     return set(valid_urls), set(invalid_urls)
 
 
-_news_urls_type = hug.types.multi([
-    comma_separated_list, DelimitedList(using='\n'), DelimitedList(using=';')
-])
-
-
 @hug.post('/updateNewsSettings', api=api)
 def update_news_crawler_settings(
-        news_urls: _news_urls_type,
+        news_urls: hug.types.comma_separated_list,
         restart_interval: hug.types.float_number=2.0,
-        append_urls: hug.types.greater_than=False):
+        append_urls: hug.types.boolean=False):
     '''
     Update the settings for the news crawler
 
     Parameters:
-        news_urls: a delimited string of valid URLs. The URLs can be delimited with commas, newlines or semicolons.
+        news_urls: a comma separated list valid URLs.
         restart_interval: interval in hours for reindexing the news URLs, fractions allowed. Must be > 0. Default: every 2 hours
         append_urls: append or replace existing URLs? Default: False (i.e. replace)
 
@@ -104,7 +99,7 @@ def update_news_crawler_settings(
     updated_config = NewsConfig.create_or_update_news_config(
         news_urls, restart_interval=restart_interval, append_urls=append_urls)
 
-    restart_spider.delay(updated_config)
+    tasks.restart_spider.delay(updated_config.jobid)
 
     reply = {
         'status': 'News crawler settings successfully updated!'
@@ -116,5 +111,5 @@ def update_news_crawler_settings(
     return reply
 
 
-register_project.delay()
+tasks.register_project.delay()
 application = api.http.server()

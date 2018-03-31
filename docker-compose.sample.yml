@@ -56,6 +56,9 @@ services:
     environment:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: mariadb
+      # EGG_VERSION should match the version number in setup.py otherwise egg file resolution will fail in api.tasks
+      EGG_VERSION: "2.0.0"
+      SCRAPYD_HOST: scrapyd
     ports:
       - "5000:5000"
     links:

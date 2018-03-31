@@ -1,8 +1,11 @@
 # Containerize Api
-FROM python:stretch
+FROM python:3.6
 
 LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
     Client="Cubic Multi Services Limited"
+
+ARG EGG_VERSION
+ARG SCRAPYD_HOST
 
 # Build a Python egg of the webcrawler
 COPY . /usr/src/webcrawler
