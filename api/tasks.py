@@ -1,7 +1,7 @@
 from celery import Celery
 
-
-celery = Celery(__name__, broker='redis://redis:6379/0', backend='redis')
+redis_uri = 'redis://redis:6379/0'
+celery = Celery(__name__, broker=redis_uri, backend=redis_uri)
 
 
 @celery.task
