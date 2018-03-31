@@ -57,7 +57,7 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: mariadb
     ports:
-      - "5000"
+      - "5000:5000"
     links:
       - mariadb
       - redis
