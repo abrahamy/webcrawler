@@ -94,13 +94,6 @@ tika
 logs/
 .vscode/
 
-# docker
-docker-compose.yml
-
-# docker volumes
-mariadb_data
-api_logs
-web_logs
 news_logs#### joe made this: http://goel.io/joe
 
 #### macos ####
@@ -133,4 +126,8 @@ Temporary Items
 .apdisk
 
 ####    Project Specific Ignores    ####
+docker-compose.yml
 scrapyd
+api_logs
+redis_data
+mariadb_data

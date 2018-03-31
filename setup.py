@@ -43,6 +43,7 @@ params = {
         'webcrawler': ['starturls.txt', ]
     },
     'data_files': [('/etc/', ['scrapy.cfg']), ],
+    'zip_safe': True,
     'install_requires': parse_requirements(),
     'classifiers': [
         'Development Status :: 5 - Production/Stable',

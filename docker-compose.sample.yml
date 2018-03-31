@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   # Database Container
-  database:
+  mariadb:
     container_name: db
     image: mariadb
     restart: always
@@ -14,7 +14,7 @@ services:
     ports:
       - "3306"
     volumes:
-      - "./mariadb_data:/var/lib/mysql"
+      - ./mariadb_data:/var/lib/mysql
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
@@ -23,14 +23,14 @@ services:
     ports:
       - "9998"
   # RabbitMQ Broker for Celery (@see celeryproject.org)
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq
+  redis:
+    container_name: redis
+    image: redis
     restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: webcrawler
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_HIPE_COMPILE: 1
+    ports:
+      - "6379"
+    volumes:
+      - ./redis_data:/data
   # Default Web Crawler Container
   scrapyd:
     container_name: scrapyd
@@ -39,13 +39,13 @@ services:
     restart: always
     environment:
       DB_PASSWORD: ${MYSQL_PASSWORD}
-      DB_HOST: mysql
+      DB_HOST: mariadb
       TIKA_SERVER_HOST: tikaserver
     ports:
       - "6800"
     links:
-      - "database:mysql"
-      - "tikaserver:tikaserver"
+      - mariadb
+      - tikaserver
   # API Container
   api:
     container_name: api
@@ -55,17 +55,18 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE_HOST: mysql
-      RABBITMQ_USER: webcrawler
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MYSQL_DATABASE_HOST: mariadb
     ports:
       - "5000"
     links:
-      - "database:mysql"
-      - "rabbitmq:rabbitmq"
+      - mariadb
+      - redis
+      - scrapyd
     volumes:
-      - "./api_logs:/home/api/logs"
+      - ./api_logs:/home/api/logs
+    command: "celery -A tasks worker --loglevel=info"
 
 volumes:
   mariadb_data:
+  redis_data:
   api_logs:
