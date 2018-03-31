@@ -8,7 +8,7 @@ LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
 COPY . /usr/src/webcrawler
 WORKDIR /usr/src/webcrawler
 RUN python setup.py bdist_egg && \
-    cp dist/webcrawler*.egg ../ && rm -rf ../webcrawler
+    cp dist/webcrawler*.egg / && rm -rf ../webcrawler
 
 # Configure and run API server
 ADD ./api/entrypoint.sh /entrypoint.sh
