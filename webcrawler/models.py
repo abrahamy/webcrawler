@@ -68,11 +68,12 @@ class NewsConfig(peewee.Model):
     # Re-index news URLs after `restart_interval` hours
     restart_interval = peewee.FloatField(default=2.0)
     news_urls = SetField()
+    jobid = peewee.CharField(null=True)
     created = peewee.DateTimeField(default=datetime.datetime.now)
     modified = peewee.DateTimeField()
 
     @classmethod
-    def create_or_update_news_config(cls, news_urls, restart_interval=2.0, append_urls=False):
+    def create_or_update_news_config(cls, news_urls, jobid='', restart_interval=2.0, append_urls=False):
         '''
         Ensures that only one instance of the news config exists
 
@@ -86,6 +87,9 @@ class NewsConfig(peewee.Model):
         except peewee.DoesNotExist as _:
             instance = cls()
             instance.news_urls = news_urls
+
+        if jobid:
+            instance.jobid = jobid
 
         instance.restart_interval = restart_interval
         instance.modified = datetime.datetime.now()
