@@ -40,6 +40,7 @@ params = {
             'scrapyd_Dockerfile',
         ],
         'api': ['Dockerfile', 'entrypoint.sh', 'requirements.txt', 'uwsgi.yml'],
+        'docs': ['Architecture.png', 'Architecture.xml'],
         'webcrawler': ['starturls.txt', ]
     },
     'data_files': [('/etc/', ['scrapy.cfg']), ],
