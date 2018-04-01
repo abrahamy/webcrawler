@@ -3,7 +3,7 @@ set -x
 
 clean_build() {
     '''Cleanup old build artefacts'''
-    local unneeded=(api_logs mariadb_data redis_data scrapyd)
+    local unneeded=(api_logs scrapy_logs mariadb_data)
     for build_dir in $unneeded
 	do
 		if [[ -d "$build_dir" ]]; then
@@ -20,9 +20,6 @@ clean_build() {
 build_containers() {
     local new_password="$(pwgen 24 1)"
     local placeholder="MySuperSecretPassword"
-
-    mkdir scrapyd
-    cp scrapyd_Dockerfile scrapyd/Dockerfile
 
     sed s/$placeholder/$new_password/g <docker-compose.sample.yml >docker-compose.yml
     
