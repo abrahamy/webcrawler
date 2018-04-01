@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from webcrawler.models import NewsConfig
+from webcrawler.models import Job
 from .web import WebSpider
 
 
 class NewsSpider(WebSpider):
-    name = 'newspider'
+    name = 'newsspider'
     custom_settings = {}
 
     @property
     def start_urls(self):
         '''Get start urls from the database'''
-        news_urls = NewsConfig.get().news_urls
+        news_urls = Job.get().news_urls
         return list(news_urls)

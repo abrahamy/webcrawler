@@ -1,6 +1,5 @@
 # Data Access Layer
 import json
-import uuid
 import logging
 import datetime
 import peewee
@@ -64,53 +63,57 @@ class SetField(peewee.TextField):
         return set(value.split(';'))
 
 
-class NewsConfig(peewee.Model):
+class Job(peewee.Model):
     '''
-    NewsConfig model is used by the `webcrawler.spiders.news.NewsSpider` to dynamically
+    Job model is used by the `webcrawler.spiders.news.NewsSpider` to dynamically
     configure the crawler
     '''
+    jobid = peewee.CharField(unique=True)
     # Re-index news URLs after `restart_interval` hours
     restart_interval = peewee.FloatField(default=2.0)
     news_urls = SetField()
-    jobid = peewee.CharField(unique=True)
     created = peewee.DateTimeField(default=datetime.datetime.now)
     modified = peewee.DateTimeField()
 
+    __default_jobid = '9e2d2634-353f-11e8-b181-8c8590ab94d2'
+
     @classmethod
-    def create_or_update_news_config(cls, news_urls, restart_interval=2.0, append_urls=False):
+    def create_or_update(cls, news_urls, restart_interval=2.0, append_urls=False):
         '''
         Ensures that only one instance of the news config exists
 
         Use only this method for saving news configs
         '''
         instance = None
-        try:
-            instance = cls.select().get()
-            instance.news_urls = (instance.news_urls +
-                                  news_urls) if append_urls else news_urls
-        except peewee.DoesNotExist as _:
-            instance = cls()
-            instance.news_urls = news_urls
 
+        try:
+            instance = cls.get(cls.jobid == cls.__default_jobid)
+        except peewee.DoesNotExist as _:
+            instance = cls.create_default_instance()
+
+        instance.news_urls = (instance.news_urls +
+                              news_urls) if append_urls else news_urls
         instance.restart_interval = restart_interval
         instance.modified = datetime.datetime.now()
-        return instance.save()
+        instance.save()
+
+        return instance
 
     @classmethod
     def create_default_instance(cls):
         '''
-        Creates a default instance of the NewsConfig model
+        Creates a default instance of the Job model
         '''
         data = {
+            'jobid': cls.__default_jobid,
             'news_urls': set([
                 'https://www.vanguardngr.com/',
                 'http://punchng.com/',
                 'https://www.dailytrust.com.ng/',
             ]),
-            'jobid': str(uuid.uuid1()),
             'modified': datetime.datetime.now()
         }
-        cls.create(**data)
+        return cls.create(**data)
 
     class Meta:
         database = DB
@@ -234,8 +237,8 @@ class Document(peewee.Model):
 
 
 def initialize_database():
-    NewsConfig.create_table(safe=True)
-    NewsConfig.create_default_instance()
+    Job.create_table(safe=True)
+    Job.create_default_instance()
     Document.create_table(safe=True)
 
 

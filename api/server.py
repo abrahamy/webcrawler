@@ -1,7 +1,8 @@
 import hug
 import validators
+import falcon
 from hug.types import comma_separated_list, DelimitedList
-from webcrawler.models import Document, NewsConfig
+from webcrawler.models import Document, Job
 import tasks
 
 
@@ -83,23 +84,20 @@ def update_news_crawler_settings(
             "status": "News crawler settings successfully updated!"
         }
     '''
-    if restart_interval < 0.5 or restart_interval > 24:
-        raise hug.exceptions.InvalidTypeData(
-            '`restart_interval` should be a decimal number between 0.5 and 24 (inclusive)')
+    if not (0.5 <= restart_interval <= 24):
+        raise falcon.HTTPBadRequest(
+            description='`restart_interval` should be a decimal number between 0.5 and 24 (inclusive)')
 
     valid_urls, invalid_urls = _validate_urls(news_urls)
 
     if not len(valid_urls):
-        error_msg = (
-            '`news_urls` must be a delimited string of valid URLs. '
-            'Allowed delimiters: comma, newline and semicolon.'
-        )
+        error_msg = '`news_urls` must be a comma separated string of valid URLs.'
         raise hug.exceptions.InvalidTypeData(error_msg)
 
-    updated_config = NewsConfig.create_or_update_news_config(
+    job = Job.create_or_update(
         news_urls, restart_interval=restart_interval, append_urls=append_urls)
 
-    tasks.restart_spider.delay(updated_config.jobid)
+    tasks.restart_spider.delay(job.jobid)
 
     reply = {
         'status': 'News crawler settings successfully updated!'

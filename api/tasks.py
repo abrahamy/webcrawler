@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import requests
 from celery import Celery
@@ -8,6 +9,11 @@ logger = logging.getLogger(__name__)
 
 redis_uri = 'redis://redis:6379/0'
 celery = Celery('api', broker=redis_uri, backend=redis_uri)
+
+
+SCRAPY_PROJECT = 'webcrawler'
+SCRAPY_DAEMON_URL = 'http://{}:6800'.format(os.getenv('SCRAPYD_HOST'))
+SCRAPY_SPIDERS = ('webspider', 'newsspider')
 
 
 class InvalidEnvironmentException(Exception):
@@ -26,41 +32,29 @@ def get_egg_filename():
     return '/webcrawler-{eggversion}-py3.6.egg'.format(eggversion=eggversion)
 
 
-SCRAPY_PROJECT = 'webcrawler'
-SCRAPY_DAEMON_URL = 'http://{}:6800'.format(os.getenv('SCRAPYD_HOST'))
-
-
-@celery.task(name='register', serializer='json')
-def register_project():
-    '''
-    Register the webcrawler project with the scrapyd server
-    '''
-    version = 'r{}'.format(os.getenv('EGG_VERSION', '2.0.0').replace('.', ''))
+def schedule_job(spider, jobid=None):
+    '''Schedule a spider run (also known as a job), returning the job id'''
+    schedule_url = '{}/schedule.json'.format(SCRAPY_DAEMON_URL)
     data = {
         'project': SCRAPY_PROJECT,
-        'version': version
+        'spider': spider
     }
-    files = {'file': open(get_egg_filename(), 'rb')}
-    url = '{}/addversion.json'.format(SCRAPY_DAEMON_URL)
+    if jobid:
+        data['jobid'] = jobid
 
     try:
-        requests.post(url, data=data, files=files)
-    except Exception as e:
-        logger.error(
-            'Celery task `register_project` has failed! Reason: {}'.format(str(e)))
-        raise e
+        response = requests.post(schedule_url, data=data)
+        result = json.loads(response.json())
 
+        if result['status'] is 'ok':
+            return result['jobid']
 
-@celery.task(name='restart', serializer='json')
-def restart_spider(jobid):
-    '''
-    Stop the currently running news spider and schedule a new run
+    except (requests.ConnectionError, ValueError) as _:
+        error = 'The scrapyd service returned an invalid JSON response!' if isinstance(
+            _, ValueError) else 'Connection to scrapyd server failed!'
+        logger.warning(error)
 
-    Arguments:
-        jobid: job id of currently running news spider instance
-    '''
-    if cancel_job(jobid):
-        schedule_job(jobid)
+    return None
 
 
 def cancel_job(jobid):
@@ -74,10 +68,43 @@ def cancel_job(jobid):
     try:
         requests.post(cancel_url, data=data)
         return True
-    except Exception as _:
+
+    except requests.ConnectionError as _:
         return False
 
 
-def schedule_job(jobid):
-    # @todo: implement
-    pass
+@celery.task(name='register', serializer='json')
+def register_project():
+    '''
+    Register the webcrawler project with the scrapyd server
+    '''
+    version = 'r{}'.format(os.getenv('EGG_VERSION', '2.0.0').replace('.', ''))
+    data = {
+        'project': SCRAPY_PROJECT,
+        'version': version
+    }
+    files = {'egg': open(get_egg_filename(), 'rb')}
+    url = '{}/addversion.json'.format(SCRAPY_DAEMON_URL)
+
+    try:
+        response = requests.post(url, data=data, files=files)
+        if response.status_code == requests.codes.ok:
+            for spider in SCRAPY_SPIDERS:
+                schedule_job(spider)
+
+    except requests.ConnectionError as _:
+        logger.error(
+            'Celery task `register_project` has failed! Reason: Connection Error.')
+        raise
+
+
+@celery.task(name='restart', serializer='json')
+def restart_spider(jobid):
+    '''
+    Stop the currently running news spider and schedule a new run
+
+    Arguments:
+        jobid: job id of currently running news spider instance
+    '''
+    if cancel_job(jobid):
+        schedule_job(SCRAPY_SPIDERS[1], jobid=jobid)
