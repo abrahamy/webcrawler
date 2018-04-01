@@ -88,7 +88,7 @@ def register_project():
 
     try:
         response = requests.post(url, data=data, files=files)
-        if response.status_code == requests.codes.ok:
+        if response.status_code == 200:
             for spider in SCRAPY_SPIDERS:
                 schedule_job(spider)
 
