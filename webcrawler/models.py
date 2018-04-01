@@ -68,52 +68,22 @@ class Job(peewee.Model):
     Job model is used by the `webcrawler.spiders.news.NewsSpider` to dynamically
     configure the crawler
     '''
-    jobid = peewee.CharField(unique=True)
-    # Re-index news URLs after `restart_interval` hours
-    restart_interval = peewee.FloatField(default=2.0)
     news_urls = SetField()
     created = peewee.DateTimeField(default=datetime.datetime.now)
     modified = peewee.DateTimeField()
 
-    __default_jobid = '9e2d2634-353f-11e8-b181-8c8590ab94d2'
-
     @classmethod
-    def create_or_update(cls, news_urls, restart_interval=2.0, append_urls=False):
-        '''
-        Ensures that only one instance of the news config exists
+    def update_news_urls(cls, news_urls, append_urls=False):
+        '''Update news URLs'''
+        # if the database has been properly initialize the following line must succeed
+        # else, a peewee.DoesNotExist will be raised
+        job = cls.get(1)
+        job.news_urls = (
+            job.news_urls + news_urls) if append_urls else news_urls
+        job.modified = datetime.datetime.now()
+        job.save()
 
-        Use only this method for saving news configs
-        '''
-        instance = None
-
-        try:
-            instance = cls.get(cls.jobid == cls.__default_jobid)
-        except peewee.DoesNotExist as _:
-            instance = cls.create_default_instance()
-
-        instance.news_urls = (instance.news_urls +
-                              news_urls) if append_urls else news_urls
-        instance.restart_interval = restart_interval
-        instance.modified = datetime.datetime.now()
-        instance.save()
-
-        return instance
-
-    @classmethod
-    def create_default_instance(cls):
-        '''
-        Creates a default instance of the Job model
-        '''
-        data = {
-            'jobid': cls.__default_jobid,
-            'news_urls': set([
-                'https://www.vanguardngr.com/',
-                'http://punchng.com/',
-                'https://www.dailytrust.com.ng/',
-            ]),
-            'modified': datetime.datetime.now()
-        }
-        return cls.create(**data)
+        return job
 
     class Meta:
         database = DB
@@ -238,7 +208,13 @@ class Document(peewee.Model):
 
 def initialize_database():
     Job.create_table(safe=True)
-    Job.create_default_instance()
+    defaults = {
+        'news_urls': set([
+            'https://www.vanguardngr.com/', 'http://punchng.com/', 'https://www.dailytrust.com.ng/',
+        ]),
+        'modified': datetime.datetime.now()
+    }
+    Job.get_or_create(id=1, defaults=defaults)
     Document.create_table(safe=True)
 
 

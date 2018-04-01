@@ -14,7 +14,7 @@ services:
     ports:
       - "3306"
     volumes:
-      - ./mariadb_data:/var/lib/mysql
+      - ./data:/var/lib/mysql
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
@@ -22,54 +22,24 @@ services:
     restart: always
     ports:
       - "9998"
-  # RabbitMQ Broker for Celery (@see celeryproject.org)
-  redis:
-    container_name: redis
-    image: redis
-    restart: always
-    ports:
-      - "6379"
-    volumes:
-      - ./redis_data:/data
-  # Default Web Crawler Container
-  scrapyd:
-    container_name: scrapyd
-    build:
-      context: scrapyd
+  # App Container
+  app:
+    container_name: app
+    build: .
     restart: always
     environment:
       DB_PASSWORD: MySuperSecretPassword
       DB_HOST: mariadb
       TIKA_SERVER_HOST: tikaserver
-    ports:
-      - "6800"
-    links:
-      - mariadb
-      - tikaserver
-  # API Container
-  api:
-    container_name: api
-    build:
-      context: .
-      dockerfile: api/Dockerfile
-    restart: always
-    environment:
-      DB_PASSWORD: MySuperSecretPassword
-      DB_HOST: mariadb
-      # EGG_VERSION should match the version number in setup.py otherwise egg file resolution will fail in api.tasks
-      EGG_VERSION: "2.0.0"
-      SCRAPYD_HOST: scrapyd
+      SCRAPY_LOG_PATH: /home/api/logs/scrapy
     ports:
       - "5000:5000"
     links:
       - mariadb
-      - redis
-      - scrapyd
+      - tikaserver
     volumes:
-      - ./api_logs:/home/api/logs
-    command: "celery -A tasks worker --loglevel=info --pidfile=/home/api/celery.pid --logfile=/home/api/logs/celery.log"
+      - ./logs:/home/api/logs
 
 volumes:
-  mariadb_data:
-  redis_data:
-  api_logs:
+  data:
+  logs:
