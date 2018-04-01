@@ -6,12 +6,16 @@ LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
 # Install Supervisord
 RUN apt-get update \
     && apt-get install -y supervisor \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && \
+    mkdir /opt/supervisor && chmod 777 /opt/supervisor
 
 # Install webcrawler
-COPY . /usr/src/
-WORKDIR /usr/src
-RUN python setup.py install && rm -rf /usr/src/*
+RUN useradd -ms /bin/bash webcrawler
+USER webcrawler
+COPY . /home/webcrawler
+WORKDIR /home/webcrawler
+RUN pip install --no-cache-dir -r requirements.txt
+VOLUME [ "/home/webcrawler/logs" ]
 
 # Install API service
 RUN useradd -ms /bin/bash api
@@ -21,9 +25,9 @@ COPY webcrawler /home/api/webcrawler
 WORKDIR /home/api
 RUN pip install --no-cache-dir -r requirements.txt
 VOLUME [ "/home/api/logs" ]
-# Start API server
-CMD [ "/usr/local/bin/uwsgi", "--yaml", "uwsgi.yml" ]
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy supervisord configs
+COPY supervisord.conf /supervisord.conf
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT [ "/usr/bin/supervisord" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
