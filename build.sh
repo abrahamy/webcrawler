@@ -3,7 +3,7 @@ set -x
 
 clean_build() {
     '''Cleanup old build artefacts'''
-    local unneeded=(api_logs scrapy_logs mariadb_data)
+    local unneeded=(api_logs data)
     for build_dir in $unneeded
 	do
 		if [[ -d "$build_dir" ]]; then
