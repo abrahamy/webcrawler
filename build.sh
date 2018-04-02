@@ -3,7 +3,7 @@ set -x
 
 clean_build() {
     '''Cleanup old build artefacts'''
-    local unneeded=(api_logs data)
+    local unneeded=(api_logs media_store data)
     for build_dir in $unneeded
 	do
 		if [[ -d "$build_dir" ]]; then

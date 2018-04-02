@@ -2,9 +2,12 @@
 
 import os
 import datetime
+import scrapy
 from tika import tika, parser
 from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
+from scrapy.pipelines.images import ImagesPipeline as BaseImagesPipeline
+from scrapy.pipelines.files import FilesPipeline as BaseFilesPipeline
 from webcrawler.items import Item, Parsed
 from webcrawler.models import Document
 
@@ -12,7 +15,22 @@ tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
 tika.TikaClientOnly = True
 
 
+class ImagesPipeline(BaseImagesPipeline):
+
+    def item_completed(self, results, item, info):
+        # @todo: implement
+        raise scrapy.exceptions.NotConfigured
+
+
+class FilesPipeline(BaseFilesPipeline):
+
+    def item_completed(self, results, item, info):
+        # @todo: implement
+        raise scrapy.exceptions.NotConfigured
+
+
 class ContentParser(object):
+
     def process_item(self, item, spider):
         '''
         Takes an instance of webcrawler.items.Item and parses the content using Tika RestAPI
@@ -47,6 +65,7 @@ class ContentParser(object):
 
 
 class FTSIndexer(object):
+
     def process_item(self, item, spider):
         '''
         Takes an instance of webcrawler.items.Parsed generates a full text search Index

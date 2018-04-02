@@ -63,7 +63,7 @@ CONCURRENT_REQUESTS = 200
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 0.25
-DOWNLOAD_TIMEOUT = 300  # prod=15
+DOWNLOAD_TIMEOUT = 15
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 8
 # CONCURRENT_REQUESTS_PER_IP = 0
@@ -102,9 +102,16 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+    'webcrawler.pipelines.ImagesPipeline': 1,
+    'webcrawler.pipelines.FilesPipeline': 2,
     'webcrawler.pipelines.ContentParser': 300,
     'webcrawler.pipelines.FTSIndexer': 400,
 }
+
+IMAGES_STORE = '/tmp'
+FILES_STORE = '/tmp'
+
+IMAGES_MIN_HEIGHT = 50
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html

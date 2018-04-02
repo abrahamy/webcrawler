@@ -38,7 +38,9 @@ services:
       - tikaserver
     volumes:
       - api_logs:/home/api/logs
+      - media_store:/tmp
 
 volumes:
   data:
   api_logs:
+  media_store:
