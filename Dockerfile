@@ -7,15 +7,12 @@ LABEL Author="Abraham Yusuf <aaondowasey@gmail.com>"\
 RUN apt-get update \
     && apt-get install -y supervisor \
     && rm -rf /var/lib/apt/lists/* && \
-    mkdir /opt/supervisor && chmod 777 /opt/supervisor
+    mkdir /opt/supervisor
 
 # Install webcrawler
-RUN useradd -ms /bin/bash webcrawler
-USER webcrawler
-COPY . /home/webcrawler
-WORKDIR /home/webcrawler
-RUN pip install --no-cache-dir -r requirements.txt
-VOLUME [ "/home/webcrawler/logs" ]
+COPY . /usr/src
+WORKDIR /usr/src
+RUN python setup.py install && rm -rf /usr/src/*
 
 # Install API service
 RUN useradd -ms /bin/bash api

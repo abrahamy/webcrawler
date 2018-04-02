@@ -4,7 +4,7 @@ from .web import WebSpider
 
 
 class NewsSpider(WebSpider):
-    name = 'newsspider'
+    name = 'news'
     custom_settings = {}
 
     @property

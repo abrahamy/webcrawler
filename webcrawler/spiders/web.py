@@ -10,7 +10,7 @@ from webcrawler.items import Item
 
 class WebSpider(CrawlSpider, LinkExtractionMixin):
     '''Crawl and index the Internet! (If it can)'''
-    name = 'webspider'
+    name = 'web'
     rules = (
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
