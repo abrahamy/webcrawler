@@ -31,17 +31,14 @@ services:
       DB_PASSWORD: MySuperSecretPassword
       DB_HOST: mariadb
       TIKA_SERVER_HOST: tikaserver
-      SCRAPY_LOG_PATH: /home/api/logs/scrapy
     ports:
       - "5000:5000"
     links:
       - mariadb
       - tikaserver
     volumes:
-      - logs_api:/home/api/logs
-      - logs_scrapy:/home/webcrawler/logs
+      - api_logs:/home/api/logs
 
 volumes:
   data:
-  logs_api:
-  logs_scrapy:
+  api_logs:
