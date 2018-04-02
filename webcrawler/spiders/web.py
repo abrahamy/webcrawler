@@ -14,7 +14,11 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
     rules = (
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
-    custom_settings = {}
+    custom_settings = {
+        # Avoid redownloading pages that have been downloaded in the last twelve hours
+        'HTTPCACHE_ENABLED': True,
+        'HTTPCACHE_EXPIRATION_SECS': 12 * 60 * 60
+    }
 
     @property
     def start_urls(self):

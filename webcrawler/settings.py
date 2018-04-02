@@ -35,8 +35,8 @@ def read_start_urls():
 
 def create_log_dir():
     '''Creates the logs directory if it does not exists'''
-    log_dir = os.getenv('SCRAPY_LOG_PATH', os.path.join(BASEDIR, 'logs'))
-    if not os.path.exists(log_dir) or os.path.isfile(log_dir):
+    log_dir = '/var/log/webcrawler'
+    if not os.path.exists(log_dir):
         try:
             os.mkdir(log_dir)
         except OSError as _:
@@ -121,9 +121,8 @@ ITEM_PIPELINES = {
 
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-HTTPCACHE_ENABLED = True
-# prod=24 * 60 * 60 # cache for 24 hours
-HTTPCACHE_EXPIRATION_SECS = 3 * 60 * 60
+# HTTPCACHE_ENABLED = False
+# HTTPCACHE_EXPIRATION_SECS = 0
 HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
@@ -146,9 +145,9 @@ DEFAULT_START_URLS = read_start_urls()
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'ERROR'
-LOG_FILE = os.path.join(create_log_dir(), 'scrapy.log')
+LOG_FILE = os.path.join(create_log_dir(), 'webcrawler.log')
 RETRY_ENABLED = False
-REDIRECT_ENABLED = True  # prod=False
+REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
 REACTOR_THREADPOOL_MAXSIZE = 50
 

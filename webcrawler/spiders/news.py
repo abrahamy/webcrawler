@@ -9,7 +9,11 @@ from .web import WebSpider
 
 class NewsSpider(WebSpider):
     name = 'news'
-    custom_settings = {}
+    custom_settings = {
+        # disable caching, always redownload pages.
+        'HTTPCACHE_ENABLED': False,
+        'HTTPCACHE_EXPIRATION_SECS': 0
+    }
     spider_start_time = time.time()
     restart_interval = 2 * 60 * 60  # restart after two hours (in seconds)
 
