@@ -43,13 +43,21 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         file_urls = self.map_links_to_urls(
             self.extract_document_links(response))
         crawled_items.append(
-            items.Files(url=response.url, file_urls=file_urls)
+            items.Files(file_urls=file_urls)
         )
 
         # images will not be parsed but simply indexed in the database
         image_urls = self.map_links_to_urls(self.extract_image_links(response))
+        # Use the text on the page where these images have been extracted as a context
+        # when searching for images
+        search_context = ''.join(
+            response.selector.select('//body//text()').extract()
+        ).strip()
         crawled_items.append(
-            items.Images(url=response.url, image_urls=image_urls)
+            items.Images(
+                image_urls=image_urls,
+                text=search_context
+            )
         )
 
         # external urls will be associated with their source url,

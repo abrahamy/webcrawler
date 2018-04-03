@@ -13,13 +13,12 @@ class WebPage(scrapy.Item):
 
 
 class Images(scrapy.Item):
-    url = scrapy.Field()
     images = scrapy.Field()
     image_urls = scrapy.Field()
+    text = scrapy.Field()
 
 
 class Files(scrapy.Item):
-    url = scrapy.Field()
     files = scrapy.Field()
     file_urls = scrapy.Field()
 

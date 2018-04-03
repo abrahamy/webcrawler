@@ -19,8 +19,26 @@ tika.TikaClientOnly = True
 class ImageParser(ImagesPipeline):
 
     def item_completed(self, results, item, info):
-        # @todo: implement
-        raise scrapy.exceptions.NotConfigured
+        for (downloaded, file_info) in results:
+            if not downloaded:
+                continue
+
+            data = {
+                'url': file_info['url'],
+                'text': item['text'],
+                'crawl_date': datetime.datetime.now()
+            }
+
+            content_type = mimetypes.guess_type(file_info['path'])[0]
+            if content_type is not None:
+                data['content_type'] = content_type
+
+            Document.create(**data)
+
+            # delete the file so that we don't fill up the disk space
+            os.remove(file_info['path'])
+
+        raise DropItem
 
 
 class FileParser(FilesPipeline):
