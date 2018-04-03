@@ -160,7 +160,7 @@ class Document(peewee.Model):
                         MATCH (
                             `text`, subject, title, description, creator, publisher
                         ) AGAINST (%s IN NATURAL LANGUAGE MODE)
-                        ''', term
+                        ''', params=(term,)
                         )).paginate(page_number, items_per_page))
 
         if return_json:
