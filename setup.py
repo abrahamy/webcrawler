@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+# Copyright (C) Abraham Aondowase Yusuf - All Rights Reserved
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE', which is part of this source code package.
+# Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
 import os
 import uuid
 from pip.req import parse_requirements as pip_parse_requirements
