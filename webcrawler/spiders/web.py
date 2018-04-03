@@ -3,6 +3,7 @@ import collections
 import tempfile
 import scrapy
 import webcrawler.items as items
+from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from webcrawler.mixins import LinkExtractionMixin
@@ -21,20 +22,43 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         'HTTPCACHE_ENABLED': True,
         'HTTPCACHE_EXPIRATION_SECS': 12 * 60 * 60
     }
+    # restart spider every time urls change
+    __hashed_urls = None
 
     @property
     def start_urls(self):
         '''Get start urls from the database'''
         _start_urls = URLConfig.get(URLConfig.spider == 'web').start_urls
+
+        if self.__hashed_urls is None:
+            self.__hashed_urls = hash(tuple(_start_urls))
+
         return list(_start_urls)
+
+    def start_urls_changed(self):
+        '''
+        Check if the `start_urls` have changed
+
+        Returns:
+            boolean: return True if the `start_urls` have changed and false otherwise
+        '''
+        start_urls_set = set(self.start_urls)
+        new_hashed_urls = hash(tuple(start_urls_set))
+
+        return new_hashed_urls == self.__hashed_urls
 
     def parse_item(self, response: scrapy.http.Response):
         '''
         Parse a response into an instance of webcrawler.items.Item
         Skips a response if it is not a HtmlResponse
         '''
+        if self.start_urls_changed():
+            # the spider will be automatically restarted by supervisord
+            raise CloseSpider
+
         crawled_items = []
         if not isinstance(response, scrapy.http.HtmlResponse):
+            # do nothing (i.e. skip handling)
             return crawled_items
 
         # media links will not be processed but simply indexed in the database

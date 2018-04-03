@@ -17,11 +17,17 @@ class NewsSpider(WebSpider):
     }
     spider_start_time = time.time()
     restart_interval = 2 * 60 * 60  # restart after two hours (in seconds)
+    # restart spider every time urls change
+    __hashed_urls = None
 
     @property
     def start_urls(self):
         '''Get start urls from the database'''
         _start_urls = URLConfig.get(URLConfig.spider == 'news').start_urls
+
+        if self.__hashed_urls is None:
+            self.__hashed_urls = hash(tuple(_start_urls))
+
         return list(_start_urls)
 
     @property
