@@ -44,7 +44,7 @@ class WebPageParser(object):
 
             return items.Parsed(
                 url=item['url'],
-                links=item['external_urls'],
+                external_urls=item['external_urls'],
                 text=parsed.get('content', ''),
                 meta=parsed['metadata']
             )
