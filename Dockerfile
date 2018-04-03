@@ -12,8 +12,7 @@ RUN apt-get update \
 # Install webcrawler
 COPY . /usr/src/
 WORKDIR /usr/src
-RUN pip install --no-cache-dir wheel && \
-    python setup.py bdist_wheel && \
+RUN python setup.py bdist_wheel && \
     pip install --no-cache-dir dist/webcrawler*.whl && \
     rm -rf /usr/src/*
 
