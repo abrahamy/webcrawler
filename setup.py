@@ -47,6 +47,7 @@ params = {
     'scripts': ['start_crawl'],
     'zip_safe': True,
     'install_requires': parse_requirements(),
+    'include_package_data': True,
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
         'License :: Other/Proprietary License',
