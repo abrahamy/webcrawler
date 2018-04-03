@@ -9,11 +9,23 @@ class Item(scrapy.Item):
     '''
     url = scrapy.Field()
     temp_filename = scrapy.Field()
-    files = scrapy.Field()              # required by scrapy.pipelines.FilesPipeline
-    images = scrapy.Field()             # required by scrapy.pipelines.ImagesPipeline
-    file_urls = scrapy.Field()          # required by scrapy.pipelines.FilesPipeline
-    image_urls = scrapy.Field()         # required by scrapy.pipelines.ImagesPipeline
-    external_urls = scrapy.Field()      # renamed from `links` to `external_urls`
+    external_urls = scrapy.Field()
+
+
+class Images(scrapy.Item):
+    url = scrapy.Field()
+    images = scrapy.Field()
+    image_urls = scrapy.Field()
+
+
+class Files(scrapy.Item):
+    url = scrapy.Field()
+    files = scrapy.Field()
+    file_urls = scrapy.Field()
+
+
+class Media(scrapy.Item):
+    url = scrapy.Field()
     media_links = scrapy.Field()
 
 
