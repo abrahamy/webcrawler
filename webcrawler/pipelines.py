@@ -2,6 +2,7 @@
 
 import os
 import datetime
+import mimetypes
 import scrapy
 import webcrawler.items as items
 from tika import tika, parser
@@ -27,6 +28,32 @@ class FileParser(FilesPipeline):
     def item_completed(self, results, item, info):
         # @todo: implement
         raise scrapy.exceptions.NotConfigured
+
+
+class MediaParser(object):
+    '''
+    Store audio/video information in the database
+    '''
+
+    def process_item(self, item, spider):
+        '''Process Media items'''
+        if not isinstance(item, items.Media):
+            return item
+
+        for link in item['media_links']:
+            data = {
+                'url': link.url,
+                'text': link.text,
+                'crawl_date': datetime.datetime.now()
+            }
+
+            content_type = mimetypes.guess_type(link.url)[0]
+            if content_type is not None:
+                data['content_type'] = content_type
+
+            Document.create(**data)
+
+        raise DropItem
 
 
 class WebPageParser(object):

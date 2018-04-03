@@ -25,7 +25,6 @@ class Files(scrapy.Item):
 
 
 class Media(scrapy.Item):
-    url = scrapy.Field()
     media_links = scrapy.Field()
 
 

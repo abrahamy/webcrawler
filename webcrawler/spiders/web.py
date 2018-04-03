@@ -37,9 +37,7 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         # media links will not be processed but simply indexed in the database
         media_links = self.extract_audio_links(response)
         media_links.extend(self.extract_video_links(response))
-        crawled_items.append(
-            items.Media(url=response.url, media_links=media_links)
-        )
+        crawled_items.append(items.Media(media_links=media_links))
 
         # documents that can be parsed for their content with Tika server
         file_urls = self.map_links_to_urls(
