@@ -131,4 +131,4 @@ docker-compose.yml
 scrapyd
 api_logs
 redis_data
-mariadb_data
+data

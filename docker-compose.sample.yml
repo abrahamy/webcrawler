@@ -14,7 +14,7 @@ services:
     ports:
       - "3306"
     volumes:
-      - data:/var/lib/mysql
+      - ./data:/var/lib/mysql
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
@@ -37,8 +37,8 @@ services:
       - mariadb
       - tikaserver
     volumes:
-      - api_logs:/home/api/logs
-      - media_store:/tmp
+      - ./api_logs:/home/api/logs
+      - ./media_store:/tmp
 
 volumes:
   data:
