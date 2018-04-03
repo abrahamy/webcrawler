@@ -10,9 +10,12 @@ RUN apt-get update \
     mkdir /opt/supervisor
 
 # Install webcrawler
-COPY . /usr/src
+COPY . /usr/src/
 WORKDIR /usr/src
-RUN python setup.py install && rm -rf /usr/src/*
+RUN pip install --no-cache-dir wheel && \
+    python setup.py bdist_wheel && \
+    pip install --no-cache-dir dist/webcrawler*.whl && \
+    rm -rf /usr/src/*
 
 # Install API service
 RUN useradd -ms /bin/bash api
