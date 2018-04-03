@@ -26,6 +26,8 @@ COPY webcrawler /home/api/webcrawler
 WORKDIR /home/api
 VOLUME [ "/home/api/logs" ]
 
+USER root
+
 # Copy supervisord configs
 COPY supervisord.conf /supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
