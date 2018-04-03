@@ -17,12 +17,13 @@ RUN python setup.py bdist_wheel && \
     rm -rf /usr/src/*
 
 # Install API service
-RUN useradd -ms /bin/bash api
+COPY api/requirements.txt /usr/src/
+RUN pip install --no-cache-dir -r /usr/src/requirements.txt && \
+    rm /usr/src/requirements.txt && useradd -ms /bin/bash api
 USER api
 COPY api/* /home/api/
 COPY webcrawler /home/api/webcrawler
 WORKDIR /home/api
-RUN pip install --no-cache-dir -r requirements.txt
 VOLUME [ "/home/api/logs" ]
 
 # Copy supervisord configs
