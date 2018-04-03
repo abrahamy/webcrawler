@@ -2,8 +2,8 @@
 import argparse
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from webcrawler.spiders.news import NewsSpider
-from webcrawler.spiders.web import WebSpider
+from .spiders.news import NewsSpider
+from .spiders.web import WebSpider
 
 
 parser = argparse.ArgumentParser(

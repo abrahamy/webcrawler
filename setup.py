@@ -45,7 +45,7 @@ params = {
     'data_files': [('/etc/', ['scrapy.cfg']), ],
     'entry_points': {
         'console_scripts': [
-            'start_crawl=__main__:main'
+            'start_crawl = webcrawler.__main__:main'
         ]
     },
     'zip_safe': True,
