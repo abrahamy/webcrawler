@@ -43,7 +43,11 @@ params = {
         'webcrawler': ['starturls.txt', ]
     },
     'data_files': [('/etc/', ['scrapy.cfg']), ],
-    'scripts': ['start_crawl'],
+    'entry_points': {
+        'console_scripts': [
+            'start_crawl=__main__:main'
+        ]
+    },
     'zip_safe': True,
     'install_requires': parse_requirements(),
     'classifiers': [
