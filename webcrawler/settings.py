@@ -102,10 +102,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'webcrawler.pipelines.ImagesPipeline': 100,
-    'webcrawler.pipelines.FilesPipeline': 200,
-    'webcrawler.pipelines.ContentParser': 300,
-    'webcrawler.pipelines.FTSIndexer': 400,
+    'webcrawler.pipelines.ImageParser': 100,
+    'webcrawler.pipelines.FileParser': 200,
+    'webcrawler.pipelines.WebPageParser': 300,
+    'webcrawler.pipelines.Indexer': 400,
 }
 
 IMAGES_STORE = '/tmp'

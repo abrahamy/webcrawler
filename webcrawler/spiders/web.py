@@ -62,7 +62,7 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
             with tempfile.NamedTemporaryFile(delete=False) as stream:
                 stream.write(response.body)
                 crawled_items.append(
-                    items.Item(
+                    items.WebPage(
                         url=response.url,
                         external_urls=external_urls,
                         temp_filename=stream.name

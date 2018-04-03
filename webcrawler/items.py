@@ -3,7 +3,7 @@
 import scrapy
 
 
-class Item(scrapy.Item):
+class WebPage(scrapy.Item):
     '''
     Returns the crawled url and a file-like object representing the content
     '''
@@ -31,6 +31,6 @@ class Media(scrapy.Item):
 
 class Parsed(scrapy.Item):
     url = scrapy.Field()
-    links = scrapy.Field()
+    external_urls = scrapy.Field()
     text = scrapy.Field()
     meta = scrapy.Field()
