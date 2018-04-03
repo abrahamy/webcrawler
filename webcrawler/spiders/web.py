@@ -6,6 +6,7 @@ import webcrawler.items as items
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from webcrawler.mixins import LinkExtractionMixin
+from webcrawler.models import URLConfig
 
 
 class WebSpider(CrawlSpider, LinkExtractionMixin):
@@ -15,6 +16,7 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
     custom_settings = {
+        'LOG_FILE': '/var/log/webcrawler/web.log',
         # Avoid redownloading pages that have been downloaded in the last twelve hours
         'HTTPCACHE_ENABLED': True,
         'HTTPCACHE_EXPIRATION_SECS': 12 * 60 * 60
@@ -22,8 +24,9 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
 
     @property
     def start_urls(self):
-        '''Get start urls from settings'''
-        self.settings.getlist('DEFAULT_START_URLS')
+        '''Get start urls from the database'''
+        _start_urls = URLConfig.get(URLConfig.spider == 'web').start_urls
+        return list(_start_urls)
 
     def parse_item(self, response: scrapy.http.Response):
         '''

@@ -2,7 +2,7 @@ import hug
 import validators
 import falcon
 from hug.types import comma_separated_list
-from webcrawler.models import Document, Job
+from webcrawler.models import Document, URLConfig
 
 
 api = hug.API(__name__)
@@ -39,26 +39,29 @@ def _validate_urls(urls):
     return set(valid_urls), set(invalid_urls)
 
 
-@hug.post('/updateNewsUrls', api=api)
-def update_news_crawler_settings(
-        news_urls: hug.types.comma_separated_list, append_urls: hug.types.boolean=False):
+@hug.post('/updateUrls', api=api)
+def update_urls(
+        spider: hug.types.one_of(['news', 'web']),
+        start_urls: hug.types.comma_separated_list,
+        append_urls: hug.types.boolean=False):
     '''
-    Update the settings for the news crawler
+    Update URLs for the web crawler
 
     Parameters:
-        news_urls: a comma separated list valid URLs.
+        spider: the spider whose URLs are to be updated
+        start_urls: a comma separated list of valid URLs.
         append_urls: append or replace existing URLs? Default: False (i.e. replace)
 
     Returns:
-        JSON object
+        JSON
     '''
-    valid_urls, invalid_urls = _validate_urls(news_urls)
+    valid_urls, invalid_urls = _validate_urls(start_urls)
 
     if not len(valid_urls):
-        error_msg = '`news_urls` must be a comma separated string of valid URLs.'
+        error_msg = '`start_urls` must be a comma separated string of valid URLs.'
         raise falcon.HTTPBadRequest(error_msg)
 
-    Job.update_news_urls(news_urls, append_urls=append_urls)
+    URLConfig.update_start_urls(spider, start_urls, append_urls=append_urls)
 
     reply = {
         'status': 'News crawler settings successfully updated!'

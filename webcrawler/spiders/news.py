@@ -3,13 +3,14 @@ import time
 import scrapy
 from urllib.parse import urlparse
 from scrapy.exceptions import CloseSpider
-from webcrawler.models import Job
+from webcrawler.models import URLConfig
 from .web import WebSpider
 
 
 class NewsSpider(WebSpider):
     name = 'news'
     custom_settings = {
+        'LOG_FILE': '/var/log/webcrawler/news.log',
         # disable caching, always redownload pages.
         'HTTPCACHE_ENABLED': False,
         'HTTPCACHE_EXPIRATION_SECS': 0
@@ -20,8 +21,8 @@ class NewsSpider(WebSpider):
     @property
     def start_urls(self):
         '''Get start urls from the database'''
-        news_urls = Job.get().news_urls
-        return list(news_urls)
+        _start_urls = URLConfig.get(URLConfig.spider == 'news').start_urls
+        return list(_start_urls)
 
     @property
     def allowed_domains(self):

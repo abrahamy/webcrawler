@@ -63,27 +63,27 @@ class SetField(peewee.TextField):
         return set(value.split(';'))
 
 
-class Job(peewee.Model):
+class URLConfig(peewee.Model):
     '''
-    Job model is used by the `webcrawler.spiders.news.NewsSpider` to dynamically
-    configure the crawler
+    URLConfig model is used to dynamically configure start_urls
     '''
-    news_urls = SetField()
+    spider = peewee.CharField(unique=True)
+    start_urls = SetField()
     created = peewee.DateTimeField(default=datetime.datetime.now)
     modified = peewee.DateTimeField()
 
     @classmethod
-    def update_news_urls(cls, news_urls, append_urls=False):
+    def update_start_urls(cls, spider, start_urls, append_urls=True):
         '''Update news URLs'''
         # if the database has been properly initialize the following line must succeed
         # else, a peewee.DoesNotExist will be raised
-        job = cls.get(1)
-        job.news_urls = (
-            job.news_urls + news_urls) if append_urls else news_urls
-        job.modified = datetime.datetime.now()
-        job.save()
+        urlconfig = cls.get(cls.spider == spider)
+        urlconfig.start_urls = (
+            urlconfig.start_urls + start_urls) if append_urls else start_urls
+        urlconfig.modified = datetime.datetime.now()
+        urlconfig.save()
 
-        return job
+        return urlconfig
 
     class Meta:
         database = DB
@@ -207,15 +207,30 @@ class Document(peewee.Model):
 
 
 def initialize_database():
-    Job.create_table(safe=True)
-    defaults = {
-        'news_urls': set([
-            'https://www.vanguardngr.com/', 'http://punchng.com/', 'https://www.dailytrust.com.ng/',
-        ]),
-        'modified': datetime.datetime.now()
-    }
-    Job.get_or_create(id=1, defaults=defaults)
     Document.create_table(safe=True)
+    URLConfig.create_table(safe=True)
+
+    now = datetime.datetime.now()
+    default_configs = {
+        'news': {
+            'start_urls': set([
+                'https://www.vanguardngr.com/', 'http://punchng.com/', 'https://www.dailytrust.com.ng/',
+            ]),
+            'modified': now
+        },
+        'web': {
+            'start_urls': set([
+                'http://www.nairaland.com/', 'http://www.lindaikejisblog.com/', 'https://www.reddit.com/',
+                'https://news.ycombinator.com/', 'http://botid.org/', 'http://www.dirjournal.com/',
+                'http://www.jayde.com/', 'http://www.dmoz.org/', 'http://vlib.org/',
+                'http://www.business.com/', 'https://botw.org/', 'http://www.stpt.com/directory/',
+            ]),
+            'modified': now
+        }
+    }
+
+    for (spider, defaults) in default_configs.items():
+        URLConfig.get_or_create(spider=spider, defaults=defaults)
 
 
 initialize_database()

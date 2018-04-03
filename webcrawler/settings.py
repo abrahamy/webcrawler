@@ -14,37 +14,6 @@ import os
 BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
-def read_start_urls():
-    filename = os.path.join(os.path.dirname(__file__), 'starturls.txt')
-
-    dirty_urls = []
-    with open(filename) as fp:
-        dirty_urls = fp.readlines()
-
-    urls = []
-    for url in dirty_urls:
-        url = url.strip()
-
-        if url.startswith('#') or len(url) == 0:
-            continue
-
-        urls.append(url)
-
-    return urls
-
-
-def create_log_dir():
-    '''Creates the logs directory if it does not exists'''
-    log_dir = '/var/log/webcrawler'
-    if not os.path.exists(log_dir):
-        try:
-            os.mkdir(log_dir)
-        except OSError as _:
-            pass
-
-    return log_dir
-
-
 BOT_NAME = 'CMSL Bot'
 
 SPIDER_MODULES = ['webcrawler.spiders']
@@ -147,12 +116,9 @@ CMSL_BOT_DATABASE = {
 
 TIKA_SERVER_HOST = os.getenv('TIKA_SERVER_HOST', 'localhost')
 
-DEFAULT_START_URLS = read_start_urls()
-
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_LEVEL = 'ERROR'
-LOG_FILE = os.path.join(create_log_dir(), 'webcrawler.log')
 RETRY_ENABLED = False
 REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
