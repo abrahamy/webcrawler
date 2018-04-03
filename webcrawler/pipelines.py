@@ -17,6 +17,9 @@ tika.TikaClientOnly = True
 
 
 class ImageParser(ImagesPipeline):
+    '''
+    Stores images along with their context (i.e. the text of the page where the images where extracted)
+    '''
 
     def item_completed(self, results, item, info):
         for (downloaded, file_info) in results:
@@ -42,10 +45,46 @@ class ImageParser(ImagesPipeline):
 
 
 class FileParser(FilesPipeline):
+    '''
+    Parse files with Tika and index them
+    '''
+
+    def index_items(self, parsed_items):
+        for item in parsed_items:
+            try:
+                data = Document.get_fields_from_tika_metadata(item['meta'])
+                data['text'] = item['text']
+                data['url'] = item['url']
+                data['crawl_date'] = datetime.datetime.now()
+
+                Document.create(**data)
+            except:
+                pass
 
     def item_completed(self, results, item, info):
-        # @todo: implement
-        raise scrapy.exceptions.NotConfigured
+        parsed_items = []
+        for (downloaded, file_info) in results:
+            if not downloaded:
+                continue
+
+            try:
+                parsed = parser.from_file(file_info['path'])
+                parsed_items.append(
+                    items.Parsed(
+                        url=file_info['url'],
+                        text=parsed.get('content', ''),
+                        meta=parsed['metadata']
+                    )
+                )
+            except:
+                pass
+            finally:
+                # delete the file so that we don't fill up the disk space
+                os.remove(file_info['path'])
+
+        self.index_items(parsed_items)
+
+        raise DropItem
 
 
 class MediaParser(object):
