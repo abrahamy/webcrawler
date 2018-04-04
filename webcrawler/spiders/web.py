@@ -85,7 +85,7 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         # Use the text on the page where these images have been extracted as a context
         # when searching for images
         search_context = ''.join(
-            response.selector.select('//body//text()').extract()
+            response.selector.xpath('//body//text()').extract()
         ).strip()
         crawled_items.append(
             items.Images(
