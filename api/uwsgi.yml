@@ -15,3 +15,5 @@ uwsgi:
     master: 1
     wsgi-file: server.py
     logto: logs/uWSGI.log
+    env: DB_HOST=$(DB_HOST)
+    env: DB_PASSWORD=$(DB_PASSWORD)
