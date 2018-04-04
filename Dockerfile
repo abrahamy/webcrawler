@@ -21,10 +21,7 @@ COPY . /usr/src/
 WORKDIR /usr/src
 RUN python setup.py bdist_wheel && \
     pip install --no-cache-dir dist/webcrawler*.whl && \
-    rm -rf /usr/src/* && mkdir -p /var/log/webcrawler && \
-    touch /var/log/webcrawler/{news,web}.log && \
-    chmod ugo+rwX /var/log/webcrawler && \
-    chmod ugo+rw /var/log/webcrawler/{news,web}.log
+    rm -rf /usr/src/*
 
 # Install API service
 COPY api/requirements.txt /usr/src/
