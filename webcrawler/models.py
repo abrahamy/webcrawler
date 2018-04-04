@@ -155,20 +155,25 @@ class Document(peewee.Model):
         return fields
 
     @staticmethod
-    def fulltext_search(term, page_number=1, items_per_page=20, return_json=True):
+    def fulltext_search(term, kind='all', page_number=1, items_per_page=20, return_json=True):
         '''
         Execute a full text search query on the model and return a paginated result
         of matching records in JSON format or as model instances
         '''
+        sql = '''
+        MATCH (
+            `text`, subject, title, description, creator, publisher
+        ) AGAINST (%s IN NATURAL LANGUAGE MODE)
+        '''
+
+        if kind in ['image', 'video']:
+            sql = '\n'.join(
+                [sql, 'AND content_type LIKE "{}/%"'.format(kind)])
+
         query = (Document
                  .select()
-                 .where(SQL(
-                        '''
-                        MATCH (
-                            `text`, subject, title, description, creator, publisher
-                        ) AGAINST (%s IN NATURAL LANGUAGE MODE)
-                        ''', params=(term,)
-                        )).paginate(page_number, items_per_page))
+                 .where(SQL(sql, params=(term,)))
+                 .paginate(page_number, items_per_page))
 
         if return_json:
             return Document.to_json(query)

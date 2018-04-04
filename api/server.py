@@ -18,19 +18,23 @@ api = hug.API(__name__)
 
 @hug.get('/search', api=api)
 @hug.post('/search', api=api)
-def search(query: hug.types.text, page: hug.types.number = 1, items: hug.types.number = 20):
+def search(
+        query: hug.types.text,
+        kind: hug.types.one_of(['all', 'image', 'video']) = 'all',
+        page: hug.types.number = 1, items: hug.types.number = 20):
     '''
     Search the database of crawled data
 
     Arguments:
         query: the text to search for
+        t: the type of content to be returned
         page: the current page of data to be returned
         items: the number of items per page
 
     Returns:
         list of JSON objects
     '''
-    return Document.fulltext_search(query, page_number=page, items_per_page=items)
+    return Document.fulltext_search(query, kind=kind, page_number=page, items_per_page=items)
 
 
 def _validate_urls(urls):
