@@ -15,8 +15,6 @@ from .spiders.news import NewsSpider
 from .spiders.web import WebSpider
 
 
-LOG_PATH = '/var/log/webcrawler'
-
 parser = argparse.ArgumentParser(
     description='Start Web Crawler', prog='start_crawl')
 parser.add_argument(
@@ -25,13 +23,6 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
-
-def create_log_dir():
-    '''Creates the log directory if it does not exists'''
-    global LOG_PATH
-    if not os.path.exists(LOG_PATH) or os.path.isfile(LOG_PATH):
-        os.mkdir(LOG_PATH)
 
 
 def main():

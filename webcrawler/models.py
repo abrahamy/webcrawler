@@ -16,8 +16,6 @@ from dateutil.parser import parse as parse_date
 from .settings import CMSL_BOT_DATABASE as db_settings
 
 
-logger = logging.getLogger(__name__)
-
 DOC_FIELD_TO_TIKA_META = {
     'content_type': ['Content-Type', 'Content-Type-Hint'],
     'created': 'dcterms:created',
@@ -123,6 +121,8 @@ class Document(peewee.Model):
         try:
             instance = super().create(**query)
         except peewee.IntegrityError as _:
+            logging.info(
+                'A document with the given URL already exists, updating record instead.')
             cls._meta.database.rollback()
             instance = cls.select().where(cls.url == query.pop('url')).get()
             instance.update(**query)
@@ -184,8 +184,8 @@ class Document(peewee.Model):
             error_message = (
                 '`Document.to_json` received an invalid argument `query`. '
                 'Got `{querytype}` instead of `peewee.SelectQuery`.'
-            ).format(querytype=type(query))
-            logger.error(error_message)
+            ).format(querytype=repr(type(query)))
+            logging.exception(error_message)
             raise ValueError(error_message)
 
         object_list = []

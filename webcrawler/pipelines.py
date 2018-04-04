@@ -23,8 +23,6 @@ from webcrawler.models import Document
 tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
 tika.TikaClientOnly = True
 
-logger = logging.getLogger(__name__)
-
 
 class ImageParser(ImagesPipeline):
     '''
@@ -49,7 +47,7 @@ class ImageParser(ImagesPipeline):
             try:
                 Document.create(**data)
             except:
-                logger.exception(
+                logging.exception(
                     'Failed to index url and metadata for {}'.format(
                         file_info['url']
                     )
@@ -76,7 +74,7 @@ class FileParser(FilesPipeline):
             try:
                 Document.create(**data)
             except:
-                logger.exception(
+                logging.exception(
                     'Failed to index url and metadata for {}'.format(
                         item['url']
                     )
@@ -98,7 +96,7 @@ class FileParser(FilesPipeline):
                     )
                 )
             except:
-                logger.exception(
+                logging.exception(
                     'Failed to index url and metadata for {}'.format(
                         file_info['url']
                     )
@@ -136,7 +134,7 @@ class MediaParser(object):
             try:
                 Document.create(**data)
             except:
-                logger.exception(
+                logging.exception(
                     'Failed to index url and metadata for {}'.format(
                         link.url
                     )
@@ -166,7 +164,7 @@ class WebPageParser(object):
             )
 
         except:
-            logger.exception(
+            logging.exception(
                 'Failed to parse content of "{}"'.format(item['url'])
             )
 
@@ -199,7 +197,7 @@ class Indexer(object):
         try:
             Document.create(**data)
         except:
-            logger.exception(
+            logging.exception(
                 'Failed to index url and metadata for {}'.format(item['url'])
             )
 
