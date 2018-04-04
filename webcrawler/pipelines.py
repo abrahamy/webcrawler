@@ -11,6 +11,7 @@ import os
 import datetime
 import mimetypes
 import scrapy
+import logging
 import webcrawler.items as items
 from tika import tika, parser
 from scrapy.exceptions import DropItem
@@ -21,6 +22,8 @@ from webcrawler.models import Document
 
 tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
 tika.TikaClientOnly = True
+
+logger = logging.getLogger(__name__)
 
 
 class ImageParser(ImagesPipeline):
@@ -43,7 +46,14 @@ class ImageParser(ImagesPipeline):
             if content_type is not None:
                 data['content_type'] = content_type
 
-            Document.create(**data)
+            try:
+                Document.create(**data)
+            except:
+                logger.exception(
+                    'Failed to index url and metadata for {}'.format(
+                        file_info['url']
+                    )
+                )
 
             # delete the file so that we don't fill up the disk space
             os.remove(file_info['path'])
@@ -58,15 +68,19 @@ class FileParser(FilesPipeline):
 
     def index_items(self, parsed_items):
         for item in parsed_items:
-            try:
-                data = Document.get_fields_from_tika_metadata(item['meta'])
-                data['text'] = item['text']
-                data['url'] = item['url']
-                data['crawl_date'] = datetime.datetime.now()
+            data = Document.get_fields_from_tika_metadata(item['meta'])
+            data['text'] = item['text']
+            data['url'] = item['url']
+            data['crawl_date'] = datetime.datetime.now()
 
+            try:
                 Document.create(**data)
             except:
-                pass
+                logger.exception(
+                    'Failed to index url and metadata for {}'.format(
+                        item['url']
+                    )
+                )
 
     def item_completed(self, results, item, info):
         parsed_items = []
@@ -84,10 +98,14 @@ class FileParser(FilesPipeline):
                     )
                 )
             except:
-                pass
-            finally:
-                # delete the file so that we don't fill up the disk space
-                os.remove(file_info['path'])
+                logger.exception(
+                    'Failed to index url and metadata for {}'.format(
+                        file_info['url']
+                    )
+                )
+
+            # delete the file so that we don't fill up the disk space
+            os.remove(file_info['path'])
 
         self.index_items(parsed_items)
 
@@ -115,7 +133,14 @@ class MediaParser(object):
             if content_type is not None:
                 data['content_type'] = content_type
 
-            Document.create(**data)
+            try:
+                Document.create(**data)
+            except:
+                logger.exception(
+                    'Failed to index url and metadata for {}'.format(
+                        link.url
+                    )
+                )
 
         raise DropItem
 
@@ -141,12 +166,12 @@ class WebPageParser(object):
             )
 
         except:
-            spider.logger.warning(
+            logger.exception(
                 'Failed to parse content of "{}"'.format(item['url'])
             )
-        finally:
-            # delete the temporary file
-            os.remove(item['temp_filename'])
+
+        # delete the temporary file
+        os.remove(item['temp_filename'])
 
         raise DropItem
 
@@ -165,17 +190,17 @@ class Indexer(object):
         if not isinstance(item, items.Parsed):
             return item
 
+        data = Document.get_fields_from_tika_metadata(item['meta'])
+        data['text'] = item['text']
+        data['url'] = item['url']
+        data['crawl_date'] = datetime.datetime.now()
+        data['links'] = item['external_urls']
+
         try:
-            doc_fields = Document.get_fields_from_tika_metadata(item['meta'])
-            doc_fields['text'] = item['text']
-            doc_fields['url'] = item['url']
-            doc_fields['crawl_date'] = datetime.datetime.now()
-            doc_fields['links'] = item['external_urls']
-
-            Document.create(**doc_fields)
-
+            Document.create(**data)
         except:
-            spider.logger.exception(
-                'Failed to index url and metadata for {}'.format(item['url']))
+            logger.exception(
+                'Failed to index url and metadata for {}'.format(item['url'])
+            )
 
         raise DropItem
