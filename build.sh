@@ -31,7 +31,7 @@ build_containers() {
 
     sed s/$placeholder/$new_password/g <docker-compose.sample.yml >docker-compose.yml
     
-    docker-compose --project-name '' build
+    docker-compose build
 }
 
 clean_build
