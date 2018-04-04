@@ -17,10 +17,9 @@ from .web import WebSpider
 class NewsSpider(WebSpider):
     name = 'news'
     custom_settings = {
-        'LOG_FILE': '/var/log/webcrawler/news.log',
-        # disable caching, always redownload pages.
-        'HTTPCACHE_ENABLED': False,
-        'HTTPCACHE_EXPIRATION_SECS': 0
+        # Cache pages for only 15 minutes.
+        'HTTPCACHE_ENABLED': True,
+        'HTTPCACHE_EXPIRATION_SECS': 15 * 60
     }
     spider_start_time = time.time()
     restart_interval = 2 * 60 * 60  # restart after two hours (in seconds)

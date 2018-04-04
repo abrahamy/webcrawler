@@ -118,7 +118,8 @@ TIKA_SERVER_HOST = os.getenv('TIKA_SERVER_HOST', 'localhost')
 
 # The settings from this point to EOF are especially
 # important for broad crawls
-LOG_LEVEL = 'ERROR'
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'
 RETRY_ENABLED = False
 REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True

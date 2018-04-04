@@ -24,7 +24,6 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )
     custom_settings = {
-        'LOG_FILE': '/var/log/webcrawler/web.log',
         # Avoid redownloading pages that have been downloaded in the last twelve hours
         'HTTPCACHE_ENABLED': True,
         'HTTPCACHE_EXPIRATION_SECS': 12 * 60 * 60
