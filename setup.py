@@ -8,11 +8,8 @@
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
 import os
 import uuid
-import shutil
 from pip.req import parse_requirements as pip_parse_requirements
 from setuptools import find_packages, setup
-from setuptools.command.install import install
-from pkg_resources import Requirement, resource_filename
 
 
 def read(filename):
@@ -27,35 +24,6 @@ def parse_requirements():
                     for r in pip_parse_requirements(requirements_file, session=uuid.uuid1())]
 
     return requirements
-
-
-class InstallCommand(install):
-    '''
-    Extend distutils default install command to support copying of scrapy.cfg to the
-    correct /etc/scrapy.cfg
-    '''
-
-    def run(self):
-        # Run base install command
-        install.run(self)
-
-        # If all went well then the package has already been installed at this point
-        # move scrapy.cfg to normal location
-        try:
-            scrapy_config = resource_filename(
-                Requirement.parse('webcrawler'), 'scrapy.cfg'
-            )
-            notice = 'copying {} to /etc/scrapy.cfg'.format(scrapy_config)
-            self.announce(notice)
-
-            shutil.copy(scrapy_config, '/etc/')
-        except:
-            notice = (
-                'Unable to write file `/etc/scrapy.cfg`. Manually copy {} '
-                'to /etc/scrapy.cfg or set the environment variable '
-                '`SCRAPY_SETTINGS_MODULE=webcrawler.settings`.'
-            )
-            self.announce(notice)
 
 
 params = {
@@ -87,9 +55,6 @@ params = {
     },
     'zip_safe': True,
     'install_requires': parse_requirements(),
-    'cmdclass': {
-        'install': InstallCommand
-    },
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
         'License :: Other/Proprietary License',
