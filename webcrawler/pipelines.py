@@ -20,7 +20,7 @@ from scrapy.pipelines.images import ImagesPipeline
 from scrapy.pipelines.files import FilesPipeline
 from webcrawler.models import Document
 
-tika.ServerHost = get_project_settings().get('TIKA_SERVER_HOST')
+
 tika.TikaClientOnly = True
 
 

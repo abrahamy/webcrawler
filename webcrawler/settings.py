@@ -114,8 +114,6 @@ CMSL_BOT_DATABASE = {
     'port': os.getenv('DB_PORT', 3306)
 }
 
-TIKA_SERVER_HOST = os.getenv('TIKA_SERVER_HOST', 'localhost')
-
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_ENABLED = True
