@@ -36,7 +36,7 @@ services:
     environment:
       DB_PASSWORD: MySuperSecretPassword
       DB_HOST: mariadb
-      TIKA_CLIENT_ONLY: True
+      TIKA_CLIENT_ONLY: 1
       TIKA_SERVER_ENDPOINT: http://tikaserver:9998
     ports:
       - "5000:5000"
