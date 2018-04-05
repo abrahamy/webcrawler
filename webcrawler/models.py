@@ -82,6 +82,7 @@ class URLConfig(peewee.Model):
         # if the database has been properly initialize the following line must succeed
         # else, a peewee.DoesNotExist will be raised
         urlconfig = cls.get(cls.spider == spider)
+        start_urls = set(start_urls)
         urlconfig.start_urls = (
             urlconfig.start_urls + start_urls) if append_urls else start_urls
         urlconfig.modified = datetime.datetime.now()
