@@ -166,7 +166,9 @@ class Document(peewee.Model):
 
         where = (match_condition,)
         if kind in ['image', 'video']:
-            filter_condition = Document.content_type.startswith(kind)
+            filter_condition = Document.content_type.startswith(
+                '{}/'.format(kind)
+            )
             where = (match_condition, filter_condition)
 
         query = (Document
