@@ -6,7 +6,6 @@
 # This file is subject to the terms and conditions defined in
 # file 'LICENSE', which is part of this source code package.
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
-import json
 import logging
 import datetime
 import peewee
@@ -155,10 +154,10 @@ class Document(peewee.Model):
         return fields
 
     @staticmethod
-    def fulltext_search(term, kind='all', page_number=1, items_per_page=20, return_json=True):
+    def fulltext_search(term, kind='all', page_number=1, items_per_page=20, return_list=True):
         '''
         Execute a full text search query on the model and return a paginated result
-        of matching records in JSON format or as model instances
+        of matching records in JSON serializable format or as model instances
         '''
         sql = '''
         MATCH (
@@ -175,19 +174,19 @@ class Document(peewee.Model):
                  .where(SQL(sql, params=(term,)))
                  .paginate(page_number, items_per_page))
 
-        if return_json:
-            return Document.to_json(query)
+        if return_list:
+            return Document.to_list(query)
 
         return query
 
     @staticmethod
-    def to_json(query):
+    def to_list(query):
         '''
-        Return the list of models in the query as a JSON array given a SelectQuery
+        Given a SelectQuery, this function returns the query result as a JSON serializable list
         '''
         if not isinstance(query, peewee.SelectQuery):
             error_message = (
-                '`Document.to_json` received an invalid argument `query`. '
+                '`Document.to_list` received an invalid argument `query`. '
                 'Got `{querytype}` instead of `peewee.SelectQuery`.'
             ).format(querytype=repr(type(query)))
             logging.exception(error_message)
@@ -209,7 +208,7 @@ class Document(peewee.Model):
 
             object_list.append(model_dict)
 
-        return json.dumps(object_list)
+        return object_list
 
     class Meta:
         database = DB
