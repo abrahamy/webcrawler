@@ -9,19 +9,17 @@
 
 import os
 import datetime
+import logging
 import mimetypes
 import scrapy
-import logging
+import tika
 import webcrawler.items as items
-from tika import tika, parser
+from tika import parser
 from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.pipelines.files import FilesPipeline
 from webcrawler.models import Document
-
-
-tika.TikaClientOnly = True
 
 
 class ImageParser(ImagesPipeline):
