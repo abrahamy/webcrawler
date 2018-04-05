@@ -159,19 +159,19 @@ class Document(peewee.Model):
         Execute a full text search query on the model and return a paginated result
         of matching records in JSON serializable format or as model instances
         '''
-        sql = '''
-        MATCH (
-            `text`, subject, title, description, creator, publisher
-        ) AGAINST (%s IN NATURAL LANGUAGE MODE)
-        '''
+        match_condition = SQL(
+            'MATCH (`text`, subject, title, description, creator, publisher) AGAINST (%s)',
+            params=(term,)
+        )
 
+        where = (match_condition,)
         if kind in ['image', 'video']:
-            sql = '\n'.join(
-                [sql, 'AND content_type LIKE "{}/%"'.format(kind)])
+            filter_condition = Document.content_type.startswith(kind)
+            where = (match_condition, filter_condition)
 
         query = (Document
                  .select()
-                 .where(SQL(sql, params=(term,)))
+                 .where(*where)
                  .paginate(page_number, items_per_page))
 
         if return_list:
