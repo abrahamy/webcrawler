@@ -38,6 +38,7 @@ services:
       DB_HOST: mariadb
       TIKA_CLIENT_ONLY: 1
       TIKA_SERVER_ENDPOINT: http://tikaserver:9998
+      SCRAPY_SETTINGS_MODULE: webcrawler.settings
     ports:
       - "5000:5000"
     links:
