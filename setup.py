@@ -10,7 +10,6 @@ import os
 import uuid
 import shutil
 from pip.req import parse_requirements as pip_parse_requirements
-from distutils import log
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 from pkg_resources import Requirement, resource_filename
@@ -47,16 +46,16 @@ class InstallCommand(install):
                 Requirement.parse('webcrawler'), 'scrapy.cfg'
             )
             notice = 'copying {} to /etc/scrapy.cfg'.format(scrapy_config)
-            self.announce(notice, level=log.INFO)
+            self.announce(notice)
 
-            shutil.copyfile(scrapy_config, '/etc/scrapy.cfg')
+            shutil.copy(scrapy_config, '/etc/')
         except:
             notice = (
                 'Unable to write file `/etc/scrapy.cfg`. Manually copy {} '
                 'to /etc/scrapy.cfg or set the environment variable '
                 '`SCRAPY_SETTINGS_MODULE=webcrawler.settings`.'
             )
-            self.announce(notice, level=log.WARN)
+            self.announce(notice)
 
 
 params = {
