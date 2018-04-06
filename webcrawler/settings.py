@@ -71,15 +71,15 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'webcrawler.pipelines.ImageParser': 1,
-    'webcrawler.pipelines.FileParser': 2,
+    'webcrawler.pipelines.ImageParser': 100,
+    'webcrawler.pipelines.FileParser': 200,
     'webcrawler.pipelines.WebPageParser': 300,
     'webcrawler.pipelines.Indexer': 400,
 }
 
-IMAGEPARSER_IMAGES_MIN_HEIGHT = 50
-IMAGEPARSER_IMAGES_STORE = '/tmp/images'
-FILEPARSER_FILES_STORE = '/tmp/files'
+IMAGES_MIN_HEIGHT = 50
+IMAGES_STORE = '/tmp/images'
+FILES_STORE = '/tmp/files'
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
