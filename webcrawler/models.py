@@ -211,7 +211,7 @@ class Document(peewee.Model):
         return (Document
                 .select(Document, relevance.alias('relevance'))
                 .where(Document.content_type.contains(kind))
-                .order_by(SQL('relevance').desc())
+                .order_by(SQL('relevance').desc()))
 
     @staticmethod
     def to_list(query):
@@ -219,16 +219,16 @@ class Document(peewee.Model):
         Given a SelectQuery, this function returns the query result as a JSON serializable list
         '''
         if not isinstance(query, peewee.SelectQuery):
-            error_message=(
+            error_message = (
                 '`Document.to_list` received an invalid argument `query`. '
                 'Got `{querytype}` instead of `peewee.SelectQuery`.'
             ).format(querytype=repr(type(query)))
             logging.exception(error_message)
             raise ValueError(error_message)
 
-        object_list=[]
+        object_list = []
         for model in query:
-            model_dict={
+            model_dict = {
                 'url': model.url,
                 'content_type': model.content_type,
                 'language': model.language,
@@ -245,8 +245,8 @@ class Document(peewee.Model):
         return object_list
 
     class Meta:
-        database=DB
-        constraints=[
+        database = DB
+        constraints = [
             SQL("FULLTEXT(`text`, subject, title, description, creator, publisher)")
         ]
 
@@ -255,8 +255,8 @@ def initialize_database():
     Document.create_table(safe=True)
     URLConfig.create_table(safe=True)
 
-    now=datetime.datetime.now()
-    default_configs={
+    now = datetime.datetime.now()
+    default_configs = {
         'news': {
             'start_urls': set([
                 'https://www.vanguardngr.com/', 'http://punchng.com/', 'https://www.dailytrust.com.ng/',
