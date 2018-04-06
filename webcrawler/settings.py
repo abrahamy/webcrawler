@@ -117,7 +117,7 @@ CMSL_BOT_DATABASE = {
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_ENABLED = True
-LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'INFO'
 RETRY_ENABLED = False
 REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
