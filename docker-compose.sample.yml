@@ -21,7 +21,7 @@ services:
       - "3306"
     volumes:
       - ./data:/var/lib/mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone='+01:00'
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone='+01:00'
   # Tika Server Container
   tikaserver:
     container_name: tikaserver
