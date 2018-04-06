@@ -73,8 +73,9 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     'webcrawler.pipelines.ImageParser': 100,
     'webcrawler.pipelines.FileParser': 200,
-    'webcrawler.pipelines.WebPageParser': 300,
-    'webcrawler.pipelines.Indexer': 400,
+    'webcrawler.pipelines.MediaParser': 300,
+    'webcrawler.pipelines.WebPageParser': 400,
+    'webcrawler.pipelines.Indexer': 500,
 }
 
 IMAGES_MIN_HEIGHT = 50
