@@ -160,25 +160,58 @@ class Document(peewee.Model):
         Execute a full text search query on the model and return a paginated result
         of matching records in JSON serializable format or as model instances
         '''
-        match_condition = SQL(
-            'MATCH (`text`, subject, title, description, creator, publisher) AGAINST (%s)',
-            params=(term,)
-        )
-
-        where = (match_condition,)
+        query = None
         if kind in ['image', 'video']:
-            filter_condition = Document.content_type.contains(kind)
-            where = (match_condition, filter_condition)
+            query = Document.fts_query_kind(term, kind)
+        else:
+            query = Document.fts_query_all(term)
 
-        query = (Document
-                 .select()
-                 .where(*where)
-                 .paginate(page_number, items_per_page))
+        query = query.paginate(page_number, items_per_page)
 
         if return_list:
             return Document.to_list(query)
 
         return query
+
+    @staticmethod
+    def fts_query_all(term):
+        '''
+        Prepare a full text search query for all possible matches
+
+        Arguments:
+            term: a string representing the search phrase
+
+        Returns:
+            peewee.SelectQuery
+        '''
+        condition = SQL(
+            'MATCH (`text`, subject, title, description, creator, publisher) AGAINST (%s IN NATURAL LANGUAGE MODE)',
+            params=(term,)
+        )
+
+        return Document.select().where(condition)
+
+    @staticmethod
+    def fts_query_kind(term, kind):
+        '''
+        Prepare a full text search query whose result have the given content type
+
+        Arguments:
+            term: a string representing the search phrase
+            kind: one of (image|video), a string specifying the expected content type
+
+        Returns:
+            peewee.SelectQuery
+        '''
+        relevance = SQL((
+            'MATCH (`text`, subject, title, description, creator, publisher) '
+            'AGAINST (%s IN BOOLEAN MODE) AS relevance'
+        ), params=(term,))
+
+        return (Document
+                .select(Document, relevance)
+                .where(Document.content_type.contains(kind))
+                .order_by(Document.c.relevance.desc()))
 
     @staticmethod
     def to_list(query):
