@@ -66,12 +66,14 @@ CMSL_BOT_DATABASE = {
     'port': os.getenv('DB_PORT', 3306)
 }
 
+REDIRECT_ENABLED = True
+
 # The settings from this point to EOF are especially
 # important for broad crawls
 LOG_ENABLED = True
 LOG_LEVEL = 'INFO'
 RETRY_ENABLED = False
-REDIRECT_ENABLED = False
+# REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
 REACTOR_THREADPOOL_MAXSIZE = 50
 
