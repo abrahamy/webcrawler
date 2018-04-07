@@ -25,8 +25,10 @@ class ItemPipeline(object):
         :param item: the item downloaded by the webcrawler
         :param spider: the spider with which the page was crawled
         '''
+        path = item['path']
+
         try:
-            parse_result = parser.from_file(item['path'])
+            parse_result = parser.from_file(str(path.resolve()))
             self.store(parse_result, item, spider)
 
         except:
@@ -34,7 +36,7 @@ class ItemPipeline(object):
                 'Failed to parse content of "{}"'.format(item['url'])
             )
         finally:
-            item['path'].unlink()
+            path.unlink()
 
         raise scrapy.exceptions.DropItem('Finished processing the item.')
 
