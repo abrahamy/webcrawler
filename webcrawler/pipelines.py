@@ -9,194 +9,56 @@
 
 import os
 import datetime
-import logging
-import mimetypes
 import scrapy
-import tika
-import webcrawler.items as items
+import tika  # initializes tika.ServerEndPoint from environment variables
 from tika import parser
-from scrapy.exceptions import DropItem
-from scrapy.utils.project import get_project_settings
-from scrapy.pipelines.images import ImagesPipeline
-from scrapy.pipelines.files import FilesPipeline
+import webcrawler.items as items
 from webcrawler.models import Document
 
 
-class ImageParser(ImagesPipeline):
-    '''
-    Stores images along with their context (i.e. the text of the page where the images where extracted)
-    '''
+class ItemPipeline(object):
 
-    def item_completed(self, results, item, info):
-        for (downloaded, file_info) in results:
-            if not downloaded:
-                continue
-
-            data = {
-                'url': file_info['url'],
-                'text': item['text'],
-                'crawl_date': datetime.datetime.now()
-            }
-
-            content_type = mimetypes.guess_type(file_info['path'])[0]
-            if content_type is not None:
-                data['content_type'] = content_type
-
-            try:
-                Document.create(**data)
-            except:
-                logging.exception(
-                    'Failed to index url and metadata for {}'.format(
-                        file_info['url']
-                    )
-                )
-
-            # delete the file so that we don't fill up the disk space
-            os.remove(file_info['path'])
-
-        raise DropItem
-
-
-class FileParser(FilesPipeline):
-    '''
-    Parse files with Tika and index them
-    '''
-
-    def index_items(self, parsed_items):
-        for item in parsed_items:
-            data = Document.get_fields_from_tika_metadata(item['meta'])
-            data['text'] = item['text']
-            data['url'] = item['url']
-            data['crawl_date'] = datetime.datetime.now()
-
-            try:
-                Document.create(**data)
-            except:
-                logging.exception(
-                    'Failed to index url and metadata for {}'.format(
-                        item['url']
-                    )
-                )
-
-    def item_completed(self, results, item, info):
-        parsed_items = []
-        for (downloaded, file_info) in results:
-            if not downloaded:
-                continue
-
-            try:
-                parsed = parser.from_file(file_info['path'])
-                parsed_items.append(
-                    items.Parsed(
-                        url=file_info['url'],
-                        text=parsed.get('content', ''),
-                        meta=parsed['metadata']
-                    )
-                )
-            except:
-                logging.exception(
-                    'Failed to index url and metadata for {}'.format(
-                        file_info['url']
-                    )
-                )
-
-            # delete the file so that we don't fill up the disk space
-            os.remove(file_info['path'])
-
-        self.index_items(parsed_items)
-
-        raise DropItem
-
-
-class MediaParser(object):
-    '''
-    Store audio/video information in the database
-    '''
-
-    def process_item(self, item, spider):
-        '''Process Media items'''
-        if not isinstance(item, items.Media):
-            return item
-
-        for link in item['media_links']:
-            data = {
-                'url': link.url,
-                'text': link.text,
-                'crawl_date': datetime.datetime.now()
-            }
-
-            content_type = mimetypes.guess_type(link.url)[0]
-            if content_type is not None:
-                data['content_type'] = content_type
-
-            try:
-                Document.create(**data)
-            except:
-                logging.exception(
-                    'Failed to index url and metadata for {}'.format(
-                        link.url
-                    )
-                )
-
-        raise DropItem
-
-
-class WebPageParser(object):
-
-    def process_item(self, item, spider):
+    def process_item(self, item: items.Item, spider: scrapy.spiders.CrawlSpider):
         '''
         Takes an instance of webcrawler.items.Item and parses the content using Tika RestAPI
-        Returns an instance of webcrawler.items.Parsed
+
+        :param item: the item downloaded by the webcrawler
+        :param spider: the spider with which the page was crawled
         '''
-        if not isinstance(item, items.WebPage):
-            return item
-
         try:
-            parsed = parser.from_file(item['temp_filename'])
-
-            return items.Parsed(
-                url=item['url'],
-                external_urls=item['external_urls'],
-                text=parsed.get('content', ''),
-                meta=parsed['metadata']
-            )
+            parse_result = parser.from_file(item['src'])
+            self.store(parse_result, item, spider)
 
         except:
-            logging.exception(
+            spider.logger.exception(
                 'Failed to parse content of "{}"'.format(item['url'])
             )
+        finally:
+            item['path'].unlink()
 
-        # delete the temporary file
-        os.remove(item['temp_filename'])
+        raise scrapy.exceptions.DropItem('Finished processing the item.')
 
-        raise DropItem
-
-
-class Indexer(object):
-    '''
-    Stores the contents of crawled web pages/documents in the database with
-    their associated Full Text Search index
-    '''
-
-    def process_item(self, item, spider):
+    def store(self, parse_result, item: items.Item, spider: scrapy.spiders.CrawlSpider):
         '''
-        Takes an instance of webcrawler.items.Parsed generates a full text search Index
-        for the content and persists the index and metadata
+        Stores contents of crawled web pages/documents in the database with
+        their associated Full Text Search index
+
+        :param item: the item downloaded by the webcrawler
+        :param spider: the spider with which the page was crawled
+        :param parse_result: the result received from parsing the item using Apache Tika
         '''
-        if not isinstance(item, items.Parsed):
-            return item
-
-        data = Document.get_fields_from_tika_metadata(item['meta'])
-        data['text'] = item['text']
-        data['url'] = item['url']
-        data['crawl_date'] = datetime.datetime.now()
-        data['links'] = item['external_urls']
-
         try:
-            Document.create(**data)
-        except:
-            logging.exception(
-                'Failed to index url and metadata for {}'.format(item['url'])
+            data = Document.get_fields_from_tika_metadata(
+                parse_result['metadata']
             )
+            data['text'] = parse_result.get('content', ''),
+            data['url'] = item['url']
+            data['crawl_date'] = datetime.datetime.now()
+            data['links'] = item['external_urls']
 
-        raise DropItem
+            Document.create(**data)
+
+        except:
+            spider.logger.exception(
+                'Failed to store metadata for {}'.format(item['url'])
+            )

@@ -6,22 +6,28 @@
 # This file is subject to the terms and conditions defined in
 # file 'LICENSE', which is part of this source code package.
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
-import collections
 import tempfile
 import scrapy
-import webcrawler.items as items
+from pathlib import Path
+from urllib.parse import urlparse
 from scrapy.exceptions import CloseSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
-from webcrawler.mixins import LinkExtractionMixin
+from webcrawler.items import Item
 from webcrawler.models import URLConfig
 
 
-class WebSpider(CrawlSpider, LinkExtractionMixin):
+link_extractor = LinkExtractor(
+    tags=('a', 'area', 'audio', 'embed', 'img', 'source', 'track', 'video'),
+    attrs=('href', 'src'), deny_extensions=()
+)
+
+
+class WebSpider(CrawlSpider):
     '''Crawl and index the Internet! (If it can)'''
     name = 'web'
     rules = (
-        Rule(LinkExtractor(), callback='parse_item', follow=True),
+        Rule(link_extractor, callback='parse_item', follow=True),
     )
     custom_settings = {
         # Avoid redownloading pages that have been downloaded in the last twelve hours
@@ -56,67 +62,35 @@ class WebSpider(CrawlSpider, LinkExtractionMixin):
     def parse_item(self, response: scrapy.http.Response):
         '''
         Parse a response into an instance of webcrawler.items.Item
-        Skips a response if it is not a HtmlResponse
         '''
         if self.start_urls_changed():
             # the spider will be automatically restarted by supervisord
-            raise CloseSpider
+            raise CloseSpider(
+                '`start_urls` have changed, restarting {} spider'.format(self.name))
 
-        crawled_items = []
-        if not isinstance(response, scrapy.http.HtmlResponse):
-            # do nothing (i.e. skip handling)
-            return crawled_items
+        item_data = {
+            'url': response.url,
+            'external_urls': self.extract_external_urls(response)
+        }
 
-        # media links will not be processed but simply indexed in the database
-        media_links = self.extract_audio_links(response)
-        media_links.extend(self.extract_video_links(response))
-        crawled_items.append(items.Media(media_links=media_links))
+        suffix = Path(response.url).suffix or None
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as stream:
+            stream.write(response.body)
+            item_data['path'] = Path(stream.name)
 
-        # documents that can be parsed for their content with Tika server
-        file_urls = self.map_links_to_urls(
-            self.extract_document_links(response))
-        crawled_items.append(
-            items.Files(file_urls=file_urls)
-        )
-
-        # images will not be parsed but simply indexed in the database
-        image_urls = self.map_links_to_urls(self.extract_image_links(response))
-        # Use the text on the page where these images have been extracted as a context
-        # when searching for images
-        search_context = ''.join(
-            response.selector.xpath('//body//text()').extract()
-        ).strip()
-        crawled_items.append(
-            items.Images(
-                image_urls=image_urls,
-                text=search_context
-            )
-        )
-
-        # external urls will be associated with their source url,
-        # this may be used later for implementing page_rank algorithm
-        external_urls = self.extract_document_links(response)
-
-        try:
-            with tempfile.NamedTemporaryFile(delete=False) as stream:
-                stream.write(response.body)
-                crawled_items.append(
-                    items.WebPage(
-                        url=response.url,
-                        external_urls=external_urls,
-                        temp_filename=stream.name
-                    )
-                )
-
-        except OSError:
-            self.logger.error(
-                'Failed to save response.body to temporary file', exec_info=True
-            )
-
-        return crawled_items
+        return [Item(**item_data)]
 
     @staticmethod
-    def map_links_to_urls(links):
-        '''Takes an iterable of links and returns a list of url strings'''
-        assert(isinstance(links, collections.Iterable))
-        return [link.url for link in links]
+    def extract_external_urls(response: scrapy.http.Response):
+        '''Extract all external urls from this page'''
+        if not isinstance(response, scrapy.http.HtmlResponse):
+            return set([])
+
+        parsed_url = urlparse(response.url)
+        domain = (parsed_url.netloc,)
+
+        _link_extractor = LinkExtractor(deny_domains=domain)
+        urls = map(lambda link: link.url,
+                   _link_extractor.extract_links(response))
+
+        return set(urls)
