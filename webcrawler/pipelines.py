@@ -26,7 +26,7 @@ class ItemPipeline(object):
         :param spider: the spider with which the page was crawled
         '''
         try:
-            parse_result = parser.from_file(item['src'])
+            parse_result = parser.from_file(item['path'])
             self.store(parse_result, item, spider)
 
         except:
