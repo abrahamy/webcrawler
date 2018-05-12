@@ -22,7 +22,9 @@ WORKDIR /usr/src
 RUN python setup.py bdist_wheel && \
     pip install --no-cache-dir dist/webcrawler*.whl && \
     rm -rf /usr/src/* && \
-    useradd -ms /bin/bash webcrawler
+    useradd -ms /bin/bash webcrawler && \
+    mkdir -p /home/webcrawler/logs && \
+    chmod ugo+rwX /home/webcrawler/logs
 
 WORKDIR /home/webcrawler
 VOLUME [ "/home/webcrawler/logs" ]
