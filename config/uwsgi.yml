@@ -7,13 +7,11 @@
 # file 'LICENSE', which is part of this source code package.
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
 uwsgi:
-    uid: api
-    chdir: /home/api
     http: 0.0.0.0:5000
     processes: 4
     threads: 2
     master: 1
-    wsgi-file: server.py
+    module: webcrawler.api.server:application
     logto: logs/uWSGI.log
     env: DB_HOST=$(DB_HOST)
     env: DB_PASSWORD=$(DB_PASSWORD)

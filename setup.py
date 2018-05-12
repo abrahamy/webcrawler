@@ -8,7 +8,6 @@
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
 import os
 import uuid
-from pip.req import parse_requirements as pip_parse_requirements
 from setuptools import find_packages, setup
 
 
@@ -20,8 +19,11 @@ def parse_requirements():
     '''Naively parse the requirements.txt file'''
     BASE_DIR = os.path.realpath(os.path.dirname(__file__))
     requirements_file = os.path.join(BASE_DIR, 'requirements.txt')
-    requirements = [str(r).split(' ')[0].strip()
-                    for r in pip_parse_requirements(requirements_file, session=uuid.uuid1())]
+
+    requirements = None
+    with open(requirements_file) as rf:
+        requirements = [line.strip()
+                        for line in rf.readlines() if line.strip()]
 
     return requirements
 
@@ -36,17 +38,16 @@ params = {
     'url': 'https://bitbucket.org/abrahamy/webcrawler.git',
     'packages': find_packages(exclude=["tests/*"]),
     'package_dir': {
-        'api': 'api',
         'webcrawler': 'webcrawler',
+        'webcrawler.api': 'webcrawler/api',
         'webcrawler.spiders': 'webcrawler/spiders'
     },
     'package_data': {
-        '': [
+        'webcrawler': [
             'build.sh', 'docker-compose.sample.yml', 'Dockerfile', 'entrypoint.sh',
             'LICENSE', 'README.md', 'requirements.txt', 'scrapy.cfg',
-            'supervisord.conf', 'webcrawler.service',
-        ],
-        'api': ['requirements.txt', 'uwsgi.yml']
+            'config/supervisord.conf', 'config/uwsgi.yml', 'config/webcrawler.service',
+        ]
     },
     'entry_points': {
         'console_scripts': [
@@ -59,7 +60,7 @@ params = {
         'Development Status :: 5 - Production/Stable',
         'License :: Other/Proprietary License',
         'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
+        'Operating System :: POSIX :: Linux',
         'Programming Language :: Python',
         'Topic :: Software Development',
     ],
