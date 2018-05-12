@@ -7,6 +7,8 @@
 # file 'LICENSE', which is part of this source code package.
 # Written by Abraham Aondowase Yusuf <aaondowasey@gmail.com>, April 2018
 uwsgi:
+    user: webcrawler
+    chdir: /home/webcrawler
     http: 0.0.0.0:5000
     processes: 4
     threads: 2

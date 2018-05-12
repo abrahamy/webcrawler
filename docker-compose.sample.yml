@@ -46,7 +46,7 @@ services:
       - mariadb
       - tikaserver
     volumes:
-      - ./api_logs:/home/api/logs
+      - ./api_logs:/home/webcrawler/logs
       - ./media_store:/tmp
 
 volumes:
