@@ -73,7 +73,7 @@ class WebSpider(CrawlSpider):
             'external_urls': self.extract_external_urls(response)
         }
 
-        suffix = Path(response.url).suffix or None
+        suffix = Path(response.url).suffix or ""
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as stream:
             stream.write(response.body)
             item_data['path'] = Path(stream.name)
