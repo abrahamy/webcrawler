@@ -30,7 +30,7 @@ def parse_requirements():
 
 params = {
     'name': 'webcrawler',
-    'version': '2.0.1',
+    'version': '2.0.2',
     'description': 'A web crawler bot',
     'author': 'Abraham Aondowase Yusuf',
     'author_email': 'aaondowasey@gmail.com',

@@ -13,7 +13,7 @@ uwsgi:
     processes: 4
     threads: 2
     master: 1
-    module: webcrawler.api.server:application
+    module: webcrawler.api:app
     logto: /home/webcrawler/logs/uWSGI.log
     env: DB_HOST=$(DB_HOST)
     env: DB_PASSWORD=$(DB_PASSWORD)

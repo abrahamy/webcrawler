@@ -20,7 +20,7 @@ RUN apt-get update \
 COPY . /usr/src/
 WORKDIR /usr/src
 RUN python setup.py bdist_wheel && \
-    pip install --no-cache-dir dist/webcrawler*.whl && \
+    pip install --no-cache-dir -U dist/webcrawler*.whl && \
     rm -rf /usr/src/* && \
     useradd -ms /bin/bash webcrawler && \
     mkdir -p /home/webcrawler/logs && \
