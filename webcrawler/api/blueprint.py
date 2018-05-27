@@ -50,7 +50,7 @@ url_model = api.model('UpdateURLs', {
         ),
     ),
     'mode': fields.String(
-        default='replace', description='update strategy (append|replace)',
+        default='replace', description='update strategy, possible values are `append`, `replace`',
     )
 })
 
@@ -89,7 +89,12 @@ class Search(Resource):
     def get(self):
         '''Search Indexed Data'''
         text = api.payload.pop('text')
-        search_result = Document.fulltext_search(text, **api.payload)
+        kwargs = {
+            'kind': api.payload.pop('kind', 'all'),
+            'page_number': api.payload.pop('page_number', 1),
+            'items_per_page': api.payload.pop('items_per_page', 20)
+        }
+        search_result = Document.fulltext_search(text, **kwargs)
         return search_result, 200
 
 
@@ -102,7 +107,7 @@ class Spider(Resource):
     @transactional
     def post(self):
         '''Update URLs and restart the spider'''
-        mode = api.payload.pop('mode')
+        mode = api.payload.pop('mode', 'replace')
         spider = api.payload.pop('spider')
         start_urls = api.payload.pop('urls').split(',')
 
