@@ -15,11 +15,15 @@ from .spiders.news import NewsSpider
 from .spiders.web import WebSpider
 
 
-parser = argparse.ArgumentParser(
-    description='Start Web Crawler', prog='start_crawl')
+parser = argparse.ArgumentParser(description="Start Web Crawler", prog="start_crawl")
 parser.add_argument(
-    '--spider', metavar='-S', type=str, dest='spider', choices=('news', 'web', 'all'),
-    required=True, help='the spider to be executed by the web crawler'
+    "--spider",
+    metavar="-S",
+    type=str,
+    dest="spider",
+    choices=("news", "web", "all"),
+    required=True,
+    help="the spider to be executed by the web crawler",
 )
 
 args = parser.parse_args()
@@ -30,9 +34,9 @@ def main():
 
     process = CrawlerProcess(settings=get_project_settings())
 
-    if args.spider == 'web':
+    if args.spider == "web":
         process.crawl(WebSpider)
-    elif args.spider == 'news':
+    elif args.spider == "news":
         process.crawl(NewsSpider)
     else:
         # crawl with all spiders
@@ -42,5 +46,5 @@ def main():
     process.start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

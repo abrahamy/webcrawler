@@ -16,7 +16,7 @@ def create_app(test_config=None):
 
     if test_config is None:
         # load config from settings file, if it exists, when not testing
-        app.config.from_object('webcrawler.settings')
+        app.config.from_object("webcrawler.settings")
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
@@ -25,10 +25,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(blueprint)
 
-    @app.route('/')
+    @app.route("/")
     def index():
         # redirects index route to api blueprint's base route
-        return redirect(url_for('api.doc'))
+        return redirect(url_for("api.doc"))
 
     return app
 

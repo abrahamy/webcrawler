@@ -10,9 +10,9 @@ import scrapy
 
 
 class Item(scrapy.Item):
-    '''
+    """
     Returns the crawled url and a file-like object representing the content
-    '''
+    """
     url = scrapy.Field()
     path = scrapy.Field()
     external_urls = scrapy.Field()
