@@ -9,7 +9,7 @@
 import functools
 import validators
 from flask import Blueprint
-from flask_restplus import abort, Api, fields, Resource
+from flask_restplus import Api, fields, Resource
 from webcrawler.models import Document, URLConfig
 
 
@@ -112,7 +112,9 @@ class Spider(Resource):
     @transactional
     def get(self):
         """List all spiders"""
-        spiders = URLConfig.select().dicts()
+        spiders = []
+        for spider in URLConfig.select().dicts():
+            spiders.append(spider)
         return spiders, 200
 
     @api.doc("Spider")
@@ -124,16 +126,22 @@ class Spider(Resource):
         spider = api.payload.pop("spider")
         start_urls = api.payload.pop("urls").split(",")
 
+        errors = {}
         if not mode in ["append", "replace"]:
-            abort(400, "`mode` must be one of `append`, `replace`")
+            errors["mode"] = "`mode` must be one of `append`, `replace`"
 
         if spider not in ["news", "web"]:
-            abort(400, "`spider` must be one of `news`, `web`")
+            errors["spider"] = "`spider` must be one of `news`, `web`"
 
         valid_urls, invalid_urls = validate_urls(start_urls)
 
         if not len(valid_urls):
-            abort(400, "`urls` must be a non empty comma separated list of valid URLs.")
+            errors[
+                "urls"
+            ] = "`urls` must be a non empty comma separated list of valid URLs."
+
+        if len(errors.keys()):
+            return errors, 400
 
         URLConfig.update_start_urls(
             spider, start_urls, append_urls=True if mode is "append" else False
