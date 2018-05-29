@@ -113,10 +113,15 @@ class Spider(Resource):
     def get(self):
         """List all spiders"""
         spiders = []
-        for spider in URLConfig.select().dicts():
-            # because `set` is not JSON serializable
-            spider["start_urls"] = list(spider["start_urls"])
-            spiders.append(spider)
+        for spider in URLConfig.select():
+            spiders.append(
+                {
+                    "spider": spider.spider,
+                    "start_urls": list(spider.start_urls),
+                    "created": spider.created.isoformat(),
+                    "modified": spider.modified.isoformat(),
+                }
+            )
         return spiders, 200
 
     @api.doc(
