@@ -108,7 +108,7 @@ class Search(Resource):
 class Spider(Resource):
     """Spider Resource"""
 
-    @api.doc("Spider")
+    @api.doc("Spider", responses={200: "Success"})
     @transactional
     def get(self):
         """List all spiders"""
@@ -117,7 +117,9 @@ class Spider(Resource):
             spiders.append(spider)
         return spiders, 200
 
-    @api.doc("Spider")
+    @api.doc(
+        "Spider", responses={200: "Success", 206: "Partial Update", 400: "Bad Request"}
+    )
     @api.expect(url_model)
     @transactional
     def post(self):
