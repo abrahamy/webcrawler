@@ -243,8 +243,8 @@ class Document(peewee.Model):
                 "subject": model.subject,
                 "description": model.description,
                 "creator": model.creator,
-                "created": model.created,
-                "modified": model.modified,
+                "created": model.created.isoformat(),
+                "modified": model.modified.isoformat() if model.modified else None,
             }
 
             object_list.append(model_dict)
