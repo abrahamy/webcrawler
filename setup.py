@@ -29,12 +29,12 @@ def parse_requirements():
 
 params = {
     "name": "webcrawler",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "A web crawler bot",
     "author": "Abraham Aondowase Yusuf",
     "author_email": "aaondowasey@gmail.com",
     "license": read("LICENSE"),
-    "url": "https://bitbucket.org/abrahamy/webcrawler.git",
+    "url": "https://gitlab.com/abrahamy/webcrawler",
     "packages": find_packages(exclude=["tests/*"]),
     "package_dir": {
         "webcrawler": "webcrawler",
