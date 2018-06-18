@@ -243,7 +243,7 @@ class Document(peewee.Model):
                 "subject": model.subject,
                 "description": model.description,
                 "creator": model.creator,
-                "created": model.created.isoformat(),
+                "created": model.created.isoformat() if model.created else None,
                 "modified": model.modified.isoformat() if model.modified else None,
             }
 
