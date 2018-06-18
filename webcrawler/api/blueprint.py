@@ -16,24 +16,31 @@ from webcrawler.models import Document, URLConfig
 blueprint = Blueprint("api", __name__, url_prefix="/api")
 api = Api(blueprint, description="Web Crawler API")
 
-search_model = api.model(
-    "Search",
-    {
-        "text": fields.String(required=True, description="The text to be searched"),
-        "kind": fields.String(
-            default="all",
-            description=(
-                "Type of search to be performed, "
-                "possible values are `all`, `image`, `video`"
-            ),
-        ),
-        "page_number": fields.Integer(
-            default=1, description="The page of result to be returned"
-        ),
-        "items_per_page": fields.Integer(
-            default=20, description="The number of items per page"
-        ),
-    },
+search_parser = api.parser()
+search_parser.add_argument(
+    "text", required=True, help="The text to be searched", location=("args",), trim=True
+)
+search_parser.add_argument(
+    "kind",
+    choices=("all", "image", "video"),
+    default="all",
+    help="Type of search to be performed, possible values are `all`, `image`, `video`",
+    location=("args",),
+    trim=True,
+)
+search_parser.add_argument(
+    "page_number",
+    default=1,
+    help="The page of result to be returned",
+    location=("args",),
+    type=int,
+)
+search_parser.add_argument(
+    "items_per_page",
+    default=20,
+    help="The number of items per page",
+    location=("args",),
+    type=int,
 )
 
 url_model = api.model(
@@ -90,17 +97,17 @@ class Search(Resource):
     """Search Resource"""
 
     @api.doc("Search", responses={200: "Search Completed!"})
-    @api.expect(search_model)
+    @api.expect(search_parser)
     @transactional
     def get(self):
         """Search Indexed Data"""
-        text = api.payload.pop("text")
+        query = search_parser.parse_args(strict=True)
         kwargs = {
-            "kind": api.payload.pop("kind", "all"),
-            "page_number": api.payload.pop("page_number", 1),
-            "items_per_page": api.payload.pop("items_per_page", 20),
+            "kind": query.kind,
+            "page_number": query.page_number,
+            "items_per_page": query.items_per_page,
         }
-        search_result = Document.fulltext_search(text, **kwargs)
+        search_result = Document.fulltext_search(query.text, **kwargs)
         return search_result, 200
 
 
