@@ -1,5 +1,5 @@
 Cython==0.28.1
-fake-useragent==0.1.10
+fake-useragent==0.1.11
 Flask==1.1.1
 flask-restplus==0.11.0
 peewee==3.10.0
