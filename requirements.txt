@@ -7,7 +7,7 @@ Pillow==6.1.0
 PyMySQL==0.9.3
 python-dateutil==2.6.1
 Scrapy==1.5.0
-scrapy-fake-useragent==1.1.0
+scrapy-fake-useragent==1.4.3
 six==1.11.0
 tika==1.19
 uWSGI==2.0.18
