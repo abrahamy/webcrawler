@@ -11,4 +11,4 @@ scrapy-fake-useragent==1.1.0
 six==1.11.0
 tika==1.19
 uWSGI==2.0.18
-validators==0.14.0
+validators==0.18.0
