@@ -1,0 +1,25 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: peewee
+    versions:
+    - 3.14.0
+    - 3.14.1
+    - 3.14.2
+    - 3.14.3
+  - dependency-name: cython
+    versions:
+    - 0.29.21
+    - 0.29.22
+  - dependency-name: scrapy
+    versions:
+    - 2.4.1
+  - dependency-name: pillow
+    versions:
+    - 6.2.1
